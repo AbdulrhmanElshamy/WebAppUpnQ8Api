@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebAppUpnQ8Api.Models;
 
 namespace UPNprojectApi.Models
 {
@@ -8,7 +9,7 @@ namespace UPNprojectApi.Models
         [Key]
         public int Service_Request_ID { get; set; }
         [ForeignKey ("CustomersTbl")]
-        public int Customer_ID { get; set; }
+        public string Customer_ID { get; set; }
         public Nullable<bool> Service_Request_Statues { get; set; }
         public Nullable<System.DateTime> Service_Request_Date { get; set; }
         public Nullable<System.DateTime> Service_Response_Date { get; set; }
@@ -24,7 +25,7 @@ namespace UPNprojectApi.Models
         public Nullable<bool> Renewal_request { get; set; }
 
         //public virtual AspNetUser AspNetUser { get; set; }
-        public virtual CustomersTbl CustomersTbl { get; set; }
+        public virtual ApplicationUser CustomersTbl { get; set; }
         public virtual SubServicesTbl SubServicesTbl { get; set; }
     }
 }

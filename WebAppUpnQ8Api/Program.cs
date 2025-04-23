@@ -27,6 +27,7 @@ using Google;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using WebAppUpnQ8Api.Services.AccountServices;
+using WebAppUpnQ8Api.Services.EmailServices;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -112,6 +113,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

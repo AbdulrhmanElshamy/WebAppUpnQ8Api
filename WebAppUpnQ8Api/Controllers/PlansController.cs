@@ -7,7 +7,7 @@ using WebAppUpnQ8Api.ViewModels.PlanViewModels;
 
 namespace WebAppUpnQ8Api.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class PlansController : ControllerBase
     {
@@ -18,65 +18,65 @@ namespace WebAppUpnQ8Api.Controllers
             _planRepository = planRepository;
         }
 
-        [HttpGet]
-        public Task<Result<List<PlanDetailsModel>>> GetPlans()
+        [HttpPost("GetAllPlans")]
+        public async Task<Result<List<PlanDetailsModel>>> GetPlans(PlanQueryParameters parameters)
         {
-            return _planRepository.AllPlans();
+            return await _planRepository.AllPlans(parameters);
         }
-        [HttpPost]
+        [HttpPost("AddPlan")]
         public async Task<Result<string>> AddPlan(PlanDetailsModel data)
         {
             return await _planRepository.PostAddNewPlan(data);
         }
-        [HttpPost]
+        [HttpPost("EditPlan")]
         public async Task<Result<string>> EditPlan(PlanDetailsModel data)
         {
             return await _planRepository.EditPlan(data);
         }
-        [HttpPost]
+        [HttpPost("DeletePlan/{id}")]
         public async Task<Result<string>> DeletePlan(int id)
         {
             return await _planRepository.DeletePlan(id);
         }
-        [HttpGet]
+        [HttpGet("DetailsPlan/{id}")]
         public async Task<Result<PlanDetailsModel>> DetailsPlan(int id)
         {
             return await _planRepository.DetailsPlan(id);
         }
-        [HttpGet]
-        public async Task<Result<List<ContentModel>>> GetContents()
+        [HttpPost("GetAllContents")]
+        public async Task<Result<List<ContentModel>>> GetContents(ContentQueryParameters parameters)
         {
-            return await _planRepository.AllContents();
+            return await _planRepository.AllContents(parameters);
         }
-        [HttpPost]
+        [HttpPost("AddContent")]
         public async Task<Result<string>> AddContent(ContentModel data)
         {
             return await _planRepository.AddEditcontent(data);
         }
-        [HttpPost]
+        [HttpPost("EditContent")]
         public async Task<Result<string>> EditContent(ContentModel data)
         {
             return await _planRepository.AddEditcontent(data);
         }
-        [HttpPost]
+        [HttpPost("DeleteContent/{id}")]
         public async Task<Result<string>> DeleteContent(int id)
         {
             return await _planRepository.DeleteContent(id);
         }
-        [HttpGet]
+        [HttpGet("AllSubscrips/{id}")]
         public async Task<Result<List<PlanSubscripModel>>> AllSubscrips(int id)
         {
             return await _planRepository.AllSubscrips(id);
         }
-        [HttpGet]
+        [HttpGet("PlanSubscripModel/{id}")]
         public async Task<Result<PlanSubscripModel>> DetailsSubscrip(int id)
         {
             return await _planRepository.DetailsSubscrip(id);
         }
-        [HttpGet]
-        public async Task<Result<string>> EditSubscrib(string data)
+        [HttpPost("EditSubscrib")]
+        public async Task<Result<string>> EditSubscrib(PlanSubscripModel planSubscripModel)
         {
-            return await _planRepository.EditSubscrib(data);
+            return await _planRepository.EditSubscrib(planSubscripModel);
         }
 
     }

@@ -5,7 +5,7 @@ namespace WebAppUpnQ8Api.ViewModels.CustomerViewModels
     public class CustomPlanModel
     {
         public int Plan_Subscripe_ID { get; set; }
-        public int Customer_ID { get; set; }
+        public string Customer_ID { get; set; }
         public Nullable<double> Subscription_Price { get; set; }
         public int Plan_ID { get; set; }
         public string? Plan_Title { get; set; }

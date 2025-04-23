@@ -18,7 +18,7 @@ namespace WebAppUpnQ8Api.Models
         public virtual DbSet<ContractConditionsTbl> ContractConditionsTbls { get; set; }
         public virtual DbSet<ContractServicesTbl> ContractServicesTbls { get; set; }
         public virtual DbSet<CountriesTbl> CountriesTbls { get; set; }
-        public virtual DbSet<CustomersTbl> CustomersTbls { get; set; }
+        //public virtual DbSet<CustomersTbl> CustomersTbls { get; set; }
         public virtual DbSet<DiscountsTbl> DiscountsTbls { get; set; }
         public virtual DbSet<DurationsTbl> DurationsTbls { get; set; }
         public virtual DbSet<EmployeesTbl> EmployeesTbls { get; set; }

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WebAppUpnQ8Api.Controllers;
 using Newtonsoft.Json.Linq;
+using WebAppUpnQ8Api.Services.EmailServices;
 
 namespace WebAppUpnQ8Api.Services.AccountServices
 {
@@ -25,8 +26,9 @@ namespace WebAppUpnQ8Api.Services.AccountServices
         private readonly IConfiguration _configuration;
         private MailSettings Mail_Settings;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailSender _emailSender;
 
-        public AccountService(WebAppUpnQ8ApiDBContext dBContext, UserManager<ApplicationUser> userManager, PasswordHasher<ApplicationUser> passwordHasher, IConfiguration configuration, IOptions<MailSettings> options, SignInManager<ApplicationUser> signInManager, ITokenRepository tokenRepository, IHttpContextAccessor httpContextAccessor)
+        public AccountService(WebAppUpnQ8ApiDBContext dBContext, UserManager<ApplicationUser> userManager, PasswordHasher<ApplicationUser> passwordHasher, IConfiguration configuration, IOptions<MailSettings> options, SignInManager<ApplicationUser> signInManager, ITokenRepository tokenRepository, IHttpContextAccessor httpContextAccessor, IEmailSender emailSender)
         {
             Mail_Settings = options.Value;
             _dBContext = dBContext;
@@ -36,6 +38,7 @@ namespace WebAppUpnQ8Api.Services.AccountServices
             _signInManager = signInManager;
             _tokenRepository = tokenRepository;
             _httpContextAccessor = httpContextAccessor;
+            _emailSender = emailSender;
         }
 
         public async Task<Result<string>> RegisterCustom(RegisterViewModel model, bool lan)
@@ -45,31 +48,90 @@ namespace WebAppUpnQ8Api.Services.AccountServices
 
                 return Result<string>.Faild("Email or username already used");
 
+            if(model.CountryId is not null && model.CountryId != 0)
+            {
+                var country = await _dBContext.CountriesTbls.FindAsync(model.CountryId);
+                if(country is null)
+                    return Result<string>.Faild("Countory not found!.");
+
+
+            }
+
+
+            if (model.CityId is not null && model.CityId != 0)
+            {
+                var city = await _dBContext.CitiesTbls.FindAsync(model.CityId);
+                if (city is null)
+                    return Result<string>.Faild("city not found!.");
+
+
+            }
+
+
+            if (model.CodeNumberId is not null && model.CodeNumberId != 0)
+            {
+                var CodeNumber = await _dBContext.CodeNumbersTbls.FindAsync(model.CodeNumberId);
+                if (CodeNumber is null)
+                    return Result<string>.Faild("Code number not found!.");
+
+
+            }
+
+
+
+
             var user = new ApplicationUser
             {
                 Id = Guid.NewGuid().ToString(),
                 Email = model.Email,
                 UserName = model.UserName,
-                PasswordHash = _passwordHasher.HashPassword(null, model.Password)
+                PasswordHash = _passwordHasher.HashPassword(null, model.Password),
+                FirstName = model.FirstName,
+                BirthDate = model.BirthDate,
+                Gender = model.Gender,
+                CityId = model.CityId != 0 && model.CityId != null ? model.CityId : null,
+                CountryId = model.CountryId != 0 && model.CountryId != null ? model.CountryId : null,
+                CodeNumberId = model.CodeNumberId != 0 && model.CodeNumberId != null ?  model.CodeNumberId : null,
+                FirstAddress = model.FirstAdderess,
+                SecondAddress = model.SecondAddress,
+                LastName = model.LateName,
+                PhoneNumber = model.FirstPhoneNumber,
+                SecondPhoneNumber = model.SecondPhoneNumber,
+                
             };
 
-            user.ActivationCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //user.ActivationCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             var result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
             {
 
-
-                CustomersTbl customer = new CustomersTbl();
-                customer.User_ID = user.Id;
-                await _dBContext.CustomersTbls.AddAsync(customer);
-                await _dBContext.SaveChangesAsync();
-
                 await _userManager.AddToRoleAsync(user, "User");
 
                 await _dBContext.SaveChangesAsync();
-                bool res = SendMail(lan, user);
+
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                string callbackUrl = GetLinkWithUserId(lan, user, token);
+
+                string body = string.Empty;
+                using (StreamReader reader = new StreamReader("ViewModels/cconfirm.html"))
+                {
+                    body = reader.ReadToEnd();
+                }
+                body = body.Replace("{ConfirmationLink}", callbackUrl);
+                body = body.Replace("{UserName}", user.UserName);
+
+                var mail = new MailData
+                {
+                    EmailToId = user.Email,
+                    EmailToName = user.FirstName ?? "",
+                    EmailSubject = "Confirm Your Email",
+                    EmailBody = body
+                };
+
+                bool res = await _emailSender.SendEmailAsync(mail);
 
                 if (res)
                 {
@@ -91,18 +153,23 @@ namespace WebAppUpnQ8Api.Services.AccountServices
 
         }
 
-        public async Task<Result<string>> ConfirmEmail(string code)
+
+
+        public async Task<Result<string>> ConfirmEmail(string userId,string code)
         {
             try
             {
                 var user = await _dBContext.Users
-               .FirstOrDefaultAsync(u => u.ActivationCode == code && u.EmailConfirmed == false);
-                if (user != null)
-                {
-                    user.EmailConfirmed = true;
-                    _dBContext.SaveChanges();
+               .FirstOrDefaultAsync(u => u.Id == userId && u.EmailConfirmed == false);
+
+                if(user is null)
+                    return Result<string>.Failed("عذرا لم يتم تأكيد الحساب");
+
+                var res =await _userManager.ConfirmEmailAsync(user,code);
+
+                if(res.Succeeded)
                     return Result<string>.Success("تم تأكيد الحساب بنجاح");
-                }
+         
                 return Result<string>.Failed("عذرا الكود خاطئ");
 
             }
@@ -119,13 +186,31 @@ namespace WebAppUpnQ8Api.Services.AccountServices
             if (user is null)
                 return Result<string>.Failed("User not found! .");
 
-            user.ActivationCode = await _userManager.GeneratePasswordResetTokenAsync(user);
-
             _dBContext.Users.Update(user);
 
             await _dBContext.SaveChangesAsync();
 
-            bool res = SendMail(lan, user);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            string callbackUrl = GetLinkWithUserId(lan, user, token);
+
+            string body = string.Empty;
+            using (StreamReader reader = new StreamReader("ViewModels/resretPassword.html"))
+            {
+                body = reader.ReadToEnd();
+            }
+            body = body.Replace("{ConfirmationLink}", callbackUrl);
+            body = body.Replace("{UserName}", user.UserName);
+
+            var mail = new MailData
+            {
+                EmailToId = user.Email,
+                EmailToName = user.FirstName ?? "",
+                EmailSubject = "Confirm Your Email",
+                EmailBody = body
+            };
+
+            bool res = await _emailSender.SendEmailAsync(mail);
 
             if (res)
                 return Result<string>.Success("plz Check Email");
@@ -137,9 +222,9 @@ namespace WebAppUpnQ8Api.Services.AccountServices
         }
 
 
-        public async Task<Result<string>> ResetPassword(string email,string code, string Password)
+        public async Task<Result<string>> ResetPassword(string Id,string code, string Password)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByIdAsync(Id);
             if (user == null)
                 return Result<string>.Failed("عذرًا، المستخدم غير موجود");
 
@@ -164,22 +249,10 @@ namespace WebAppUpnQ8Api.Services.AccountServices
                 return Result<string>.Failed("Email Already Confirmed");
 
 
-            var token = await _userManager.GenerateConcurrencyStampAsync(user);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            string frontendUrl = _configuration["FrontendUrl"];
-            string callbackUrl = "";
-            if (lan)
-            {
-                callbackUrl = $"{frontendUrl}/ar?code={token}";
-            }
-            else
-            {
-                callbackUrl = $"{frontendUrl}/en?code={token}";
-            }
-            MailData Mail_Data = new MailData();
-            Mail_Data.EmailToId = user.Email;
-            Mail_Data.EmailToName = user.Email;
-            Mail_Data.EmailSubject = "Confirm Email";
+            string callbackUrl = GetLinkWithUserId(lan, user, token);
+
             string body = string.Empty;
             using (StreamReader reader = new StreamReader("ViewModels/cconfirm.html"))
             {
@@ -187,8 +260,16 @@ namespace WebAppUpnQ8Api.Services.AccountServices
             }
             body = body.Replace("{ConfirmationLink}", callbackUrl);
             body = body.Replace("{UserName}", user.UserName);
-            Mail_Data.EmailBody = body;
-            bool res = SendMail(Mail_Data);
+
+            var mail = new MailData
+            {
+                EmailToId = user.Email,
+                EmailToName = user.FirstName ?? "",
+                EmailSubject = "Confirm Your Email",
+                EmailBody = body
+            };
+
+            bool res = await _emailSender.SendEmailAsync(mail);
 
 
             if (res)
@@ -204,7 +285,7 @@ namespace WebAppUpnQ8Api.Services.AccountServices
 
         }
 
-        public async Task<Result<ResponsLoginViewModel>> LoginCustom(RegisterViewModel model)
+        public async Task<Result<ResponsLoginViewModel>> LoginCustom(LoginDTO model)
         {
             var user = _dBContext.Users.Where(a => a.Email == model.Email).FirstOrDefault();
             if (user != null && user.EmailConfirmed)
@@ -213,20 +294,7 @@ namespace WebAppUpnQ8Api.Services.AccountServices
 
                 if (result1.Succeeded)
                 {
-                    var accessToken = _tokenRepository.GenerateAccessToken(user);
-                    var refreshToken = _tokenRepository.GenerateRefreshToken();
-                    var refresh = new RefreshTokenTbl();
-                    refresh.UserId = "null";
-                    refresh.Token = refreshToken;
-                    refresh.IsUsed = false;
-                    refresh.ExpirationDate = DateTime.Now.AddDays(3);
-                    await _dBContext.RefreshTokenTbls.AddAsync(refresh);
-                    await _dBContext.SaveChangesAsync();
-                    var tt = new ResponsLoginViewModel();
-                    tt.Token = accessToken;
-                    tt.Email = user.Email;
-                    tt.RefreshToken = refreshToken;
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    ResponsLoginViewModel tt = await GetToken(user);
                     return Result<ResponsLoginViewModel>.Success(tt);
                 }
                 else
@@ -239,6 +307,25 @@ namespace WebAppUpnQ8Api.Services.AccountServices
                 return Result<ResponsLoginViewModel>.Failed("Email or Pass Uncorrect");
             }
 
+        }
+
+        public async Task<ResponsLoginViewModel> GetToken(ApplicationUser? user)
+        {
+            var accessToken = _tokenRepository.GenerateAccessToken(user);
+            var refreshToken = _tokenRepository.GenerateRefreshToken();
+            var refresh = new RefreshTokenTbl();
+            refresh.UserId = "null";
+            refresh.Token = refreshToken;
+            refresh.IsUsed = false;
+            refresh.ExpirationDate = DateTime.Now.AddDays(3);
+            await _dBContext.RefreshTokenTbls.AddAsync(refresh);
+            await _dBContext.SaveChangesAsync();
+            var tt = new ResponsLoginViewModel();
+            tt.Token = accessToken;
+            tt.Email = user.Email;
+            tt.RefreshToken = refreshToken;
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return tt;
         }
 
         public async Task<Result<ResponsLoginViewModel>> RefreshToken([FromBody] RefreshTokenModel model)
@@ -299,59 +386,36 @@ namespace WebAppUpnQ8Api.Services.AccountServices
             await _dBContext.SaveChangesAsync(); ;
         }
 
-        private bool SendMail(bool lan, ApplicationUser user)
+        private string GetLinkWithUserId(bool lan, ApplicationUser user,string code)
         {
             string frontendUrl = _configuration["FrontendUrl"];
             string callbackUrl = "";
             if (lan)
             {
-                callbackUrl = $"{frontendUrl}/ar?code={user.ActivationCode}";
+                callbackUrl = $"{frontendUrl}/ar?userId={user.Id}&code={code}";
             }
             else
             {
-                callbackUrl = $"{frontendUrl}/en?code={user.ActivationCode}";
+                callbackUrl = $"{frontendUrl}/en?userId={user.Id}&code={code}";
             }
-            MailData Mail_Data = new MailData();
-            Mail_Data.EmailToId = user.Email;
-            Mail_Data.EmailToName = user.Email;
-            Mail_Data.EmailSubject = "Confirm Email";
-            string body = string.Empty;
-            using (StreamReader reader = new StreamReader("ViewModels/cconfirm.html"))
-            {
-                body = reader.ReadToEnd();
-            }
-            body = body.Replace("{ConfirmationLink}", callbackUrl);
-            body = body.Replace("{UserName}", user.UserName);
-            Mail_Data.EmailBody = body;
-            bool res = SendMail(Mail_Data);
-            return res;
+
+            return callbackUrl;
         }
 
-        private bool SendMail(MailData Mail_Data)
+        private string GetLink(bool lan, ApplicationUser user,string code)
         {
-            try
+            string frontendUrl = _configuration["FrontendUrl"];
+            string callbackUrl = "";
+            if (lan)
             {
-                MimeMessage email_Message = new MimeMessage();
-                MailboxAddress email_From = new MailboxAddress(Mail_Settings.Name, Mail_Settings.EmailId);
-                email_Message.From.Add(email_From);
-                MailboxAddress email_To = new MailboxAddress(Mail_Data.EmailToName, Mail_Data.EmailToId);
-                email_Message.To.Add(email_To);
-                email_Message.Subject = Mail_Data.EmailSubject;
-                BodyBuilder emailBodyBuilder = new BodyBuilder();
-                emailBodyBuilder.HtmlBody = Mail_Data.EmailBody;
-                email_Message.Body = emailBodyBuilder.ToMessageBody();
-                SmtpClient MailClient = new SmtpClient();
-                MailClient.Connect(Mail_Settings.Host, Mail_Settings.Port, Mail_Settings.UseSSL);
-                MailClient.Authenticate(Mail_Settings.EmailId, Mail_Settings.Password);
-                MailClient.Send(email_Message);
-                MailClient.Disconnect(true);
-                MailClient.Dispose();
-                return true;
+                callbackUrl = $"{frontendUrl}/ar?code={code}";
             }
-            catch
+            else
             {
-                return false;
+                callbackUrl = $"{frontendUrl}/en?code={code}";
             }
+
+            return callbackUrl;
         }
     }
 }

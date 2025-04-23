@@ -5,7 +5,7 @@ namespace WebAppUpnQ8Api.ViewModels.ServicesViewModels
     public class ServiceRequestDetailsModel
     {
         public int Service_Request_ID { get; set; }
-        public Nullable<int> Customer_ID { get; set; }
+        public string Customer_ID { get; set; }
         //public Nullable<bool> Service_Request_Statues { get; set; }
         public Nullable<System.DateTime> Service_Request_Date { get; set; }
         //public string ServiceRequestDate { get; set; }

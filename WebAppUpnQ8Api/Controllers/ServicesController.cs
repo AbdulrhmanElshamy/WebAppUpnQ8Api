@@ -9,7 +9,7 @@ using WebAppUpnQ8Api.ViewModels.ServicesViewModels;
 
 namespace WebAppUpnQ8Api.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
     public class ServicesController : ControllerBase

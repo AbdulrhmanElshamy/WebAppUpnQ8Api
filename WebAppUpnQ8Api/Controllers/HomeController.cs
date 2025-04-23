@@ -53,8 +53,8 @@ namespace WebAppUpnQ8Api.Controllers
                 Testmonial_ID = a.Testmonial_ID,
                 Rating_Stars = a.Rating_Stars,
                 Testmonial_Note = a.Testmonial_Note,
-                First_Name = a.CustomersTbl.First_Name,
-                Last_Name = a.CustomersTbl.Last_Name
+                First_Name = a.CustomersTbl.FirstName,
+                Last_Name = a.CustomersTbl.LastName
             }).ToListAsync();
             return Ok(testmonials);
         }

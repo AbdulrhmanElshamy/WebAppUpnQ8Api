@@ -62,48 +62,104 @@ namespace WebAppUpnQ8Api.RepositoryModels
             }
         }
 
-        public async Task<Result<List<ContentModel>>> AllContents()
-        {
-            var contents = await _dBContext.ContentsTbls.Select( a => new ContentModel
-            {
-                Content_ID = a.Content_ID,
-                Content_Name = a.Content_Name,
-                Content_Name_Ar = a.Content_Name_Ar
-            }).ToListAsync();
-
-            return Result<List<ContentModel>>.Success(contents);
-        }
-
-        public async Task<Result<List<PlanDetailsModel>>> AllPlans()
+        public async Task<Result<List<ContentModel>>> AllContents(ContentQueryParameters parameters)
         {
             try
             {
-                var plans = await _dBContext.PlansTbls.Select(a => new PlanDetailsModel
+                var query = _dBContext.ContentsTbls.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(parameters.Search))
                 {
-                    Plan_ID = a.Plan_ID,
-                    Plan_Title = a.Plan_Title,
-                    Plan_Description = a.Plan_Description,
-                    Price_6m = a.Price_6m,
-                    Price_1y = a.Price_1y,
-                    Price_2y = a.Price_2y,
-                    Price_1m = a.Price_1m,
-                    Plan_Title_Ar = a.Plan_Title_Ar,
-                    Plan_Description_Ar = a.Plan_Description_Ar
-                }).ToListAsync();
-                if (plans.Count() != 0)
-                {
-                    return Result<List<PlanDetailsModel>>.Success(plans);
+                    query = query.Where(c =>
+                        c.Content_Name.Contains(parameters.Search) ||
+                        c.Content_Name_Ar.Contains(parameters.Search));
                 }
-                else
+
+                var contents = await query
+                    .OrderByDescending(c => c.Content_ID)
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .Select(a => new ContentModel
+                    {
+                        Content_ID = a.Content_ID,
+                        Content_Name = a.Content_Name,
+                        Content_Name_Ar = a.Content_Name_Ar
+                    })
+                    .ToListAsync();
+
+                return Result<List<ContentModel>>.Success(contents);
+            }
+            catch
+            {
+                return Result<List<ContentModel>>.Failed("عذرا حدثت مشكلة ما");
+            }
+        }
+
+
+        public async Task<Result<List<PlanDetailsModel>>> AllPlans(PlanQueryParameters parameters)
+        {
+            try
+            {
+                var query = _dBContext.PlansTbls.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(parameters.Search))
                 {
-                    return Result<List<PlanDetailsModel>>.Failed("عذرا لا يوجد خطط بعد");
+                    query = query.Where(p =>
+                        p.Plan_Title.Contains(parameters.Search) ||
+                        p.Plan_Description.Contains(parameters.Search) ||
+                        p.Plan_Title_Ar.Contains(parameters.Search) ||
+                        p.Plan_Description_Ar.Contains(parameters.Search));
                 }
+
+                if (parameters.MinPrice.HasValue)
+                {
+                    query = query.Where(p =>
+                        (p.Price_1m ?? 0) >= (double)parameters.MinPrice ||
+                        (p.Price_6m ?? 0) >= (double)parameters.MinPrice ||
+                        (p.Price_1y ?? 0) >= (double)parameters.MinPrice ||
+                        (p.Price_2y ?? 0) >= (double)parameters.MinPrice);
+                }
+
+                if (parameters.MaxPrice.HasValue)
+                {
+                    query = query.Where(p =>
+                        (p.Price_1m ?? double.MaxValue) <= (double)parameters.MaxPrice ||
+                        (p.Price_6m ?? double.MaxValue) <= (double)parameters.MaxPrice ||
+                        (p.Price_1y ?? double.MaxValue) <= (double)parameters.MaxPrice ||
+                        (p.Price_2y ?? double.MaxValue) <= (double)parameters.MaxPrice);
+                }
+
+                int totalCount = await query.CountAsync();
+
+                var plans = await query
+                    .OrderByDescending(p => p.Plan_ID)
+                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .Select(a => new PlanDetailsModel
+                    {
+                        Plan_ID = a.Plan_ID,
+                        Plan_Title = a.Plan_Title,
+                        Plan_Description = a.Plan_Description,
+                        Price_6m = a.Price_6m,
+                        Price_1y = a.Price_1y,
+                        Price_2y = a.Price_2y,
+                        Price_1m = a.Price_1m,
+                        Plan_Title_Ar = a.Plan_Title_Ar,
+                        Plan_Description_Ar = a.Plan_Description_Ar
+                    })
+                    .ToListAsync();
+
+                return plans.Count > 0
+                    ? Result<List<PlanDetailsModel>>.Success(plans)
+                    : Result<List<PlanDetailsModel>>.Failed("عذرا لا يوجد خطط بعد");
             }
             catch
             {
                 return Result<List<PlanDetailsModel>>.Failed("عذرا حدثت مشكلة ما");
             }
         }
+
+
 
         public async Task<Result<List<PlanSubscripModel>>> AllSubscrips(int id)
         {
@@ -127,8 +183,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Plan_Title_Ar = a.PlansTbl.Plan_Title_Ar,
                         Plan_Description_Ar = a.PlansTbl.Plan_Description_Ar,
                         Final_Price = a.Subscription_Price - (a.Subscription_Price * a.DiscountsTbl.Discount_Percent / 100),
-                        First_Name = a.CustomersTbl.First_Name,
-                        Last_Name = a.CustomersTbl.Last_Name,
+                        First_Name = a.CustomersTbl.FirstName,
+                        Last_Name = a.CustomersTbl.LastName,
                         Discount_Percent = a.DiscountsTbl.Discount_Percent,
                         
 
@@ -155,8 +211,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                        Plan_Title_Ar = a.PlansTbl.Plan_Title_Ar,
                        Plan_Description_Ar = a.PlansTbl.Plan_Description_Ar,
                        Final_Price = a.Subscription_Price - (a.Subscription_Price * a.DiscountsTbl.Discount_Percent / 100),
-                       First_Name = a.CustomersTbl.First_Name,
-                       Last_Name = a.CustomersTbl.Last_Name,
+                       First_Name = a.CustomersTbl.FirstName,
+                       Last_Name = a.CustomersTbl.LastName,
                        Discount_Percent = a.DiscountsTbl.Discount_Percent,
 
 
@@ -284,8 +340,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         DurationInMonth = a.DurationInMonth,
                         Id = a.Id,
                         Subscripe_Code = a.Subscripe_Code,
-                        First_Name = a.CustomersTbl.First_Name,
-                        Last_Name = a.CustomersTbl.Last_Name,
+                        First_Name = a.CustomersTbl.FirstName,
+                        Last_Name = a.CustomersTbl.LastName,
                         Plan_Title = a.PlansTbl.Plan_Title,
                         Plan_Description = a.PlansTbl.Plan_Description,
                         Discount_Percent = a.DiscountsTbl.Discount_Percent,
@@ -322,83 +378,103 @@ namespace WebAppUpnQ8Api.RepositoryModels
             }
             
         }
-
         public async Task<Result<string>> EditPlan(PlanDetailsModel plan)
         {
             try
             {
-                if (plan != null && plan.Plan_ID != 0)
-                {
-
-                    var oldplan = _dBContext.PlansTbls.Find(plan.Plan_ID);
-                    if (oldplan != null)
-                    {
-                        oldplan.Plan_Title = plan.Plan_Title;
-                        oldplan.Plan_Description = plan.Plan_Description;
-                        oldplan.Plan_Title_Ar = plan.Plan_Title_Ar;
-                        oldplan.Plan_Description_Ar = plan.Plan_Description_Ar;
-                        oldplan.Price_6m = plan.Price_6m;
-                        oldplan.Price_1y = plan.Price_1y;
-                        oldplan.Price_2y = plan.Price_2y;
-                        oldplan.Price_1m = plan.Price_1m;
-                        foreach(var item1 in plan.PlanContentModels)
-                        {
-                            if(item1.Plan_Content_ID == 0)
-                            {
-                                //add new
-                                PlanContentsTbl planContent = new PlanContentsTbl();
-                                planContent.Content_Value = item1.Content_Value;
-                                planContent.Content_Value_Ar = item1.Content_Value_Ar;
-                                planContent.Content_ID = item1.Content_ID;
-                                planContent.Plan_ID = plan.Plan_ID;
-                                await _dBContext.PlanContentsTbls.AddAsync(planContent);
-                                await _dBContext.SaveChangesAsync();
-                            }
-                            else
-                            {
-                                var oldplancontent = await _dBContext.PlanContentsTbls.
-                                    Where(a => a.Plan_Content_ID == item1.Plan_Content_ID).FirstOrDefaultAsync();
-                                oldplancontent.Content_Value = item1.Content_Value;
-                                oldplancontent.Content_Value_Ar = item1.Content_Value_Ar;
-                                await _dBContext.SaveChangesAsync();
-                            }
-                        }
-                        
-                        await _dBContext.SaveChangesAsync();
-                        return Result<string>.Success("تمت عملية التعديل بنجاح");
-                    }
-                    else
-                    {
-                        return Result<string>.Failed("عذرا هناك مشكلة ما ");
-                    }
-                }
-                else
+                if (plan == null || plan.Plan_ID == 0)
                 {
                     return Result<string>.Failed("عذرا هناك مشكلة ما ");
                 }
+
+                var oldPlan = await _dBContext.PlansTbls.FindAsync(plan.Plan_ID);
+                if (oldPlan == null)
+                {
+                    return Result<string>.Failed("عذرا الخطة غير موجودة");
+                }
+
+
+                oldPlan.Plan_Title = plan.Plan_Title;
+                oldPlan.Plan_Description = plan.Plan_Description;
+                oldPlan.Plan_Title_Ar = plan.Plan_Title_Ar;
+                oldPlan.Plan_Description_Ar = plan.Plan_Description_Ar;
+                oldPlan.Price_6m = plan.Price_6m;
+                oldPlan.Price_1y = plan.Price_1y;
+                oldPlan.Price_2y = plan.Price_2y;
+                oldPlan.Price_1m = plan.Price_1m;
+
+                foreach (var item1 in plan.PlanContentModels)
+                {
+                    if (item1.Plan_Content_ID == 0)
+                    {
+                        
+                        var contentExists = await _dBContext.ContentsTbls
+                            .AnyAsync(c => c.Content_ID == item1.Content_ID);
+
+                        if (!contentExists)
+                        {
+                            return Result<string>.Failed($"المحتوى برقم المعرف {item1.Content_ID} غير موجود");
+                        }
+
+                        var newPlanContent = new PlanContentsTbl
+                        {
+                            Content_Value = item1.Content_Value,
+                            Content_Value_Ar = item1.Content_Value_Ar,
+                            Content_ID = item1.Content_ID,
+                            Plan_ID = plan.Plan_ID
+                        };
+
+                        await _dBContext.PlanContentsTbls.AddAsync(newPlanContent);
+                    }
+                    else
+                    {
+                       
+                        var oldPlanContent = await _dBContext.PlanContentsTbls
+                            .Where(a => a.Plan_Content_ID == item1.Plan_Content_ID)
+                            .FirstOrDefaultAsync();
+
+                        if (oldPlanContent == null)
+                        {
+                            return Result<string>.Failed($"المحتوى برقم المعرف {item1.Plan_Content_ID} غير موجود");
+                        }
+
+                        oldPlanContent.Content_Value = item1.Content_Value;
+                        oldPlanContent.Content_Value_Ar = item1.Content_Value_Ar;
+                    }
+                }
+
+                await _dBContext.SaveChangesAsync();
+                return Result<string>.Success("تمت عملية التعديل بنجاح");
             }
-            catch
+            catch (Exception ex)
             {
+                
                 return Result<string>.Failed("عذرا هناك مشكلة ما ");
             }
-           
         }
 
-        public async Task<Result<string>> EditSubscrib(string data)
+
+
+        public async Task<Result<string>> EditSubscrib(PlanSubscripModel planSubscripModel)
         {
             try
             {
-                var planSubscrips = JsonConvert.DeserializeObject<PlanSubscripModel>(data);
-                foreach (var item in planSubscrips.planeSubscripContents)
+                foreach (var item in planSubscripModel.planeSubscripContents)
                 {
                     var plan = _dBContext.PlanSubscripeContentsTbls.Find(item.Subscripe_Content_ID);
+                    if(plan is null)
+                        return Result<string>.Failed("الخطه غير موجوده");
+
                     plan.Current_Value = item.Current_Value;
                     await _dBContext.SaveChangesAsync();
                 }
-                if (planSubscrips.Subscription_End_Date != null)
+                if (planSubscripModel.Subscription_End_Date != null)
                 {
-                    var subscripe = _dBContext.PlanSubscripesTbls.Find(planSubscrips.Plan_Subscripe_ID);
-                    subscripe.Subscription_End_Date = planSubscrips.Subscription_End_Date;
+                    var subscripe = _dBContext.PlanSubscripesTbls.Find(planSubscripModel.Plan_Subscripe_ID);
+                    if (subscripe is null)
+                        return Result<string>.Failed("الاشتراك غير موجود");
+
+                    subscripe.Subscription_End_Date = planSubscripModel.Subscription_End_Date;
                     await _dBContext.SaveChangesAsync();
                 }
                 return Result<string>.Success("تمت عملية التعديل بنجاح");
@@ -413,44 +489,62 @@ namespace WebAppUpnQ8Api.RepositoryModels
         {
             try
             {
-                if (plan != null)
+                if (plan == null)
+                    return Result<string>.Failed("عذرا هناك مشكلة ما");
+
+                var newPlan = new PlansTbl
                 {
-                    PlansTbl plans = new PlansTbl();
-                    plans.Plan_Title = plan.Plan_Title;
-                    plans.Plan_Description = plan.Plan_Description;
-                    plans.Plan_Title_Ar = plan.Plan_Title_Ar;
-                    plans.Plan_Description_Ar = plan.Plan_Description_Ar;
-                    plans.Price_6m = plan.Price_6m;
-                    plans.Price_1y = plan.Price_1y;
-                    plans.Price_2y = plan.Price_2y;
-                    plans.Price_1m = plan.Price_1m;
-                    await _dBContext.PlansTbls.AddAsync(plans);
-                    await _dBContext.SaveChangesAsync();
-                    List<PlanContentsTbl> planContents = new List<PlanContentsTbl>();
-                    foreach( var item in plan.PlanContentModels)
+                    Plan_Title = plan.Plan_Title,
+                    Plan_Description = plan.Plan_Description,
+                    Plan_Title_Ar = plan.Plan_Title_Ar,
+                    Plan_Description_Ar = plan.Plan_Description_Ar,
+                    Price_1m = plan.Price_1m,
+                    Price_6m = plan.Price_6m,
+                    Price_1y = plan.Price_1y,
+                    Price_2y = plan.Price_2y
+                };
+
+                await _dBContext.PlansTbls.AddAsync(newPlan);
+                await _dBContext.SaveChangesAsync();
+
+                var validContentIds = await _dBContext.ContentsTbls
+                    .Select(c => c.Content_ID)
+                    .ToListAsync();
+
+                var planContents = plan.PlanContentModels
+                    .Where(item => validContentIds.Contains(item.Content_ID)) 
+                    .Select(item => new PlanContentsTbl
                     {
-                        PlanContentsTbl planContents1 = new PlanContentsTbl();
-                        planContents1.Plan_ID = plans.Plan_ID;
-                        planContents1.Content_Value = item.Content_Value;
-                        planContents1.Content_Value_Ar = item.Content_Value_Ar;
-                        planContents1.Content_ID = item.Content_ID;
-                        planContents.Add(planContents1);
-                    }
-                    
+                        Plan_ID = newPlan.Plan_ID,
+                        Content_ID = item.Content_ID,
+                        Content_Value = item.Content_Value,
+                        Content_Value_Ar = item.Content_Value_Ar
+                    }).ToList();
+                var invalidContentIds = plan.PlanContentModels
+                    .Where(item => !validContentIds.Contains(item.Content_ID))
+                    .Select(item => item.Content_ID)
+                    .ToList();
+
+                if (invalidContentIds.Any())
+                {
+                    return Result<string>.Failed($"المحتوى برقم المعرف {string.Join(", ", invalidContentIds)} غير موجود");
+                }
+
+                if (planContents.Count > 0)
+                {
                     await _dBContext.PlanContentsTbls.AddRangeAsync(planContents);
                     await _dBContext.SaveChangesAsync();
-                    return Result<string>.Success("تمت عملية الاضافة بنجاح");
                 }
-                else
-                {
-                    return Result<string>.Failed("عذرا هناك مشكلة ما ");
-                }
-            }
-            catch
-            {
-                return Result<string>.Failed("عذرا هناك مشكلة ما ");
-            }
 
+                return Result<string>.Success("تم الحفظ بنجاح");
+            }
+            catch (Exception ex)
+            {
+                
+                return Result<string>.Failed("عذرا هناك مشكلة ما");
+            }
         }
+
+
     }
 }

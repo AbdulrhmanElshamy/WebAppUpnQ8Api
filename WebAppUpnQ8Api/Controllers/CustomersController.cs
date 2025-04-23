@@ -22,7 +22,7 @@ namespace WebAppUpnQ8Api.Controllers
             return await _customerRepository.AllCustomers();
         }
         [HttpGet]
-        public async Task<Result<GetCustomDetailsModel>> DetailsCustomer(int id)
+        public async Task<Result<GetCustomDetailsModel>> DetailsCustomer(string id)
         {
             return await _customerRepository.DetailsCustomer(id);
         }

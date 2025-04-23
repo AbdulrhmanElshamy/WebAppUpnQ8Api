@@ -214,9 +214,9 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     requestsQuery = requestsQuery.Where(a => a.Request_Status == query.RequestStatus.Value);
                 }
 
-                if (query.CustomerId.HasValue)
+                if (!string.IsNullOrEmpty(query.CustomerId))
                 {
-                    requestsQuery = requestsQuery.Where(a => a.Customer_ID == query.CustomerId.Value);
+                    requestsQuery = requestsQuery.Where(a => a.Customer_ID == query.CustomerId);
                 }
 
                 var totalCount = await requestsQuery.CountAsync();
@@ -237,8 +237,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Renewal_price = a.Renewal_price,
                         Renewal_request = a.Renewal_request,
                         Requset_Code = a.Requset_Code,
-                        First_Name = a.CustomersTbl.First_Name,
-                        Last_Name = a.CustomersTbl.Last_Name,
+                        First_Name = a.CustomersTbl.FirstName,
+                        Last_Name = a.CustomersTbl.LastName,
                         Sub_Service_Title = a.SubServicesTbl.Sub_Service_Title,
                         Service_Title = a.SubServicesTbl.ServicesTbl.Service_Title,
                         Sub_Service_Title_Ar = a.SubServicesTbl.Sub_Service_Title_Ar,
@@ -372,8 +372,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Renewal_price = a.Renewal_price,
                         Renewal_request = a.Renewal_request,
                         Requset_Code = a.Requset_Code,
-                        First_Name = a.CustomersTbl.First_Name,
-                        Last_Name = a.CustomersTbl.Last_Name,
+                        First_Name = a.CustomersTbl.FirstName,
+                        Last_Name = a.CustomersTbl.LastName,
                         Sub_Service_Title_Ar = a.SubServicesTbl.Sub_Service_Title_Ar,
                         Service_Title_Ar = a.SubServicesTbl.ServicesTbl.Service_Title_Ar,
                         Sub_Service_Title = a.SubServicesTbl.Sub_Service_Title,
@@ -751,8 +751,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     Renewal_price = a.Renewal_price,
                     Renewal_request = a.Renewal_request,
                     Requset_Code = a.Requset_Code,
-                    First_Name = a.CustomersTbl.First_Name,
-                    Last_Name = a.CustomersTbl.Last_Name,
+                    First_Name = a.CustomersTbl.FirstName,
+                    Last_Name = a.CustomersTbl.LastName,
                     Sub_Service_Title_Ar = a.SubServicesTbl.Sub_Service_Title_Ar,
                     Service_Title_Ar = a.SubServicesTbl.ServicesTbl.Service_Title_Ar,
                     Sub_Service_Title = a.SubServicesTbl.Sub_Service_Title,

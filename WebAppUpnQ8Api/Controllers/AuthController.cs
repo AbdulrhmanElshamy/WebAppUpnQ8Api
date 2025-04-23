@@ -78,9 +78,9 @@ namespace WebAppUpnQ8Api.Controllers
 
         [HttpPost]
         
-        public async Task<Result<string>> ConfirmEmail(string code)
+        public async Task<Result<string>> ConfirmEmail(string userId,string code)
         {
-           var res = await _service.ConfirmEmail(code);
+           var res = await _service.ConfirmEmail(userId, code);
 
             return res;
         }
@@ -91,7 +91,7 @@ namespace WebAppUpnQ8Api.Controllers
 
 
         [HttpPost]
-        public async Task<Result<ResponsLoginViewModel>> LoginCustom(RegisterViewModel model)
+        public async Task<Result<ResponsLoginViewModel>> LoginCustom(LoginDTO model)
         {
            var res = await _service.LoginCustom(model);
 
@@ -119,9 +119,9 @@ namespace WebAppUpnQ8Api.Controllers
 
 
         [HttpPost("ResetPassword")]
-        public async Task<Result<string>> ResetPassword(string email, string code,string password)
+        public async Task<Result<string>> ResetPassword(string userId, string code,string password)
         {
-            var res = await _service.ResetPassword(email,code, password);
+            var res = await _service.ResetPassword(userId, code, password);
             return res;
         }
 
@@ -143,38 +143,56 @@ namespace WebAppUpnQ8Api.Controllers
 
         [HttpGet]
         [EnableCors("AllowAll")]
-        public IActionResult  GoogleLogin()
+        public IActionResult GoogleLogin()
         {
             var properties = new AuthenticationProperties
             {
-                RedirectUri = Url.Action("CallBack")
+                RedirectUri = Url.Action(nameof(GoogleCallback))
             };
+
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
-        
+
         [HttpGet]
         [EnableCors("AllowAll")]
-        public async Task<IActionResult> CallBack()
+        public async Task<IActionResult> GoogleCallback()
         {
-            var authenticateResult = await HttpContext.AuthenticateAsync();
-            if (!authenticateResult.Succeeded)
-            {
-                var failureMessage = authenticateResult.Failure?.Message ?? "Unknown error";
-                return BadRequest(new { Message = "Google authentication failed", Error = failureMessage });
+            var result = await HttpContext.AuthenticateAsync();
 
+            if (!result.Succeeded)
+            {
+                var failureMessage = result.Failure?.Message ?? "Unknown error";
+                return BadRequest(new { Message = "Google authentication failed", Error = failureMessage });
             }
 
-            var email = authenticateResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
-            var name = authenticateResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
+            var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(email))
-                return BadRequest(new { Message = "Failed to retrieve email from Google." });
-
-            return Ok(new
             {
-                Message = "Login successful",
-                User = new { Name = name, Email = email }
-            });
+                return BadRequest(new { Message = "Failed to retrieve email from Google." });
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FirstName = name
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return BadRequest(new { Message = "User creation failed", Errors = createResult.Errors });
+                }
+            }
+
+            var res = await _service.GetToken(user);
+
+            return Ok(res);
         }
 
 

@@ -18,26 +18,26 @@ namespace WebAppUpnQ8Api.RepositoryModels
         {
             try
             {
-                var customers = await _dBContext.CustomersTbls.Include(a => a.CodeNumbersTbl).
+                var customers = await _dBContext.Users.Include(a => a.CodeNumbersTbl).
                     Include(a => a.CitiesTbl).
                     ThenInclude(b => b.CountriesTbl).
                     Select(a => new GetCustomModel
                     {
-                        Customer_ID = a.Customer_ID,
-                        First_Name = a.First_Name,
-                        Last_Name = a.Last_Name,
-                        Birth_Day_Date = a.Birth_Day_Date,
-                        Phone_Number_1 = a.Phone_Number_1,
-                        Phone_Number_2 = a.Phone_Number_2,
-                        Address_1 = a.Address_1,
-                        Address_2 = a.Address_2,
-                        Country_ID = a.Country_ID,
+                        Customer_ID = a.Id,
+                        First_Name = a.FirstName,
+                        Last_Name = a.LastName,
+                        Birth_Day_Date = a.BirthDate,
+                        Phone_Number_1 = a.PhoneNumber,
+                        Phone_Number_2 = a.SecondPhoneNumber,
+                        Address_1 = a.FirstAddress,
+                        Address_2 = a.SecondAddress,
+                        Country_ID = a.CountryId,
                         City_Name_Eng = a.CitiesTbl.City_Name_Eng,
                         Country_Name_Eng = a.CitiesTbl.CountriesTbl.Country_Name_Eng,
-                        City_ID = a.City_ID,
+                        City_ID = a.CityId,
                         Gender = a.Gender,
-                        Register_Date = a.Register_Date,
-                        Code_Number_ID_1 = a.Code_Number_ID_1,
+                        Register_Date = a.RegisterDate,
+                        Code_Number_ID_1 = a.CodeNumberId,
                         Code_Number = a.CodeNumbersTbl.Code_Number
 
                     }).ToListAsync();
@@ -50,33 +50,33 @@ namespace WebAppUpnQ8Api.RepositoryModels
             }
         }
 
-        public async Task<Result<GetCustomDetailsModel>> DetailsCustomer(int id)
+        public async Task<Result<GetCustomDetailsModel>> DetailsCustomer(string id)
         {
             try
             {
-                var customer = await _dBContext.CustomersTbls.Include(a => a.CodeNumbersTbl).
+                var customer = await _dBContext.Users.Include(a => a.CodeNumbersTbl).
                     Include(a => a.CitiesTbl).
                     ThenInclude(b => b.CountriesTbl).Include(a => a.PlanSubscripesTbls).
                     Include(a => a.SubscriptionsTbls).Include(a => a.ServiceRequestsTbls).
-                    Where(a => a.Customer_ID == id).Select(a => new GetCustomDetailsModel
+                    Where(a => a.Id == id).Select(a => new GetCustomDetailsModel
                     {
                         InformationInfo = new GetCustomModel()
                         {
-                        Customer_ID = a.Customer_ID,
-                        First_Name = a.First_Name,
-                        Last_Name = a.Last_Name,
-                        Birth_Day_Date = a.Birth_Day_Date,
-                        Phone_Number_1 = a.Phone_Number_1,
-                        Phone_Number_2 = a.Phone_Number_2,
-                        Address_1 = a.Address_1,
-                        Address_2 = a.Address_2,
-                        Country_ID = a.Country_ID,
+                        Customer_ID = a.Id,
+                        First_Name = a.FirstName,
+                        Last_Name = a.LastName,
+                        Birth_Day_Date = a.BirthDate,
+                        Phone_Number_1 = a.PhoneNumber,
+                        Phone_Number_2 = a.SecondPhoneNumber,
+                        Address_1 = a.FirstAddress,
+                        Address_2 = a.SecondAddress,
+                        Country_ID = a.CountryId,
                         City_Name_Eng = a.CitiesTbl.City_Name_Eng,
                         Country_Name_Eng = a.CitiesTbl.CountriesTbl.Country_Name_Eng,
-                        City_ID = a.City_ID,
+                        City_ID = a.CityId,
                         Gender = a.Gender,
-                        Register_Date = a.Register_Date,
-                        Code_Number_ID_1 = a.Code_Number_ID_1,
+                        Register_Date = a.RegisterDate,
+                        Code_Number_ID_1 = a.CodeNumberId,
                         Code_Number = a.CodeNumbersTbl.Code_Number
                         },
                         customServices = a.ServiceRequestsTbls.Select(b => new CustomServiceModel 

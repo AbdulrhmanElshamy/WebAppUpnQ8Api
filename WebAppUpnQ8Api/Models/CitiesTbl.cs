@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using WebAppUpnQ8Api.Models;
 
 namespace UPNprojectApi.Models
 {
@@ -15,6 +16,6 @@ namespace UPNprojectApi.Models
         public int Country_ID { get; set; }
 
         public virtual CountriesTbl CountriesTbl { get; set; }
-        public virtual ICollection<CustomersTbl> CustomersTbls { get; set; }
+        public virtual ICollection<ApplicationUser> CustomersTbls { get; set; }
     }
 }

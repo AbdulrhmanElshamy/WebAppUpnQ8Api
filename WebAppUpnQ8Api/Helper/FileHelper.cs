@@ -1,4 +1,6 @@
-﻿namespace WebAppUpnQ8Api.Helper
+﻿using SixLabors.ImageSharp.Formats.Webp;
+
+namespace WebAppUpnQ8Api.Helper
 {
     public static class FileHelper
     {
@@ -7,14 +9,19 @@
             if (file == null || file.Length == 0)
                 return null;
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var fileName = Guid.NewGuid() + ".webp";
             var fullPath = Path.Combine(folderPath, fileName);
 
-            Directory.CreateDirectory(folderPath); 
+            Directory.CreateDirectory(folderPath);
 
-            using (var stream = new FileStream(fullPath, FileMode.Create))
+            using (var image = await Image.LoadAsync(file.OpenReadStream()))
             {
-                await file.CopyToAsync(stream);
+                var encoder = new WebpEncoder
+                {
+                    Quality = 75 // You can adjust quality (0–100)
+                };
+
+                await image.SaveAsync(fullPath, encoder);
             }
 
             return fileName;
