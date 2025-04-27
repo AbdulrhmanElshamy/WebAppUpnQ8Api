@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UPNprojectApi.Models;
 using WebAppUpnQ8Api.Models;
+using WebAppUpnQ8Api.Repository;
 using WebAppUpnQ8Api.ViewModels;
 using WebAppUpnQ8Api.ViewModels.HomeViewModels;
 
@@ -16,10 +17,12 @@ namespace WebAppUpnQ8Api.Controllers
     public class HomeController : ControllerBase
     {
         private readonly WebAppUpnQ8ApiDBContext _dBContext;
+        private readonly IServiceRepository _serviceRepository;
 
-        public HomeController(WebAppUpnQ8ApiDBContext dBContext)
+        public HomeController(WebAppUpnQ8ApiDBContext dBContext, IServiceRepository serviceRepository)
         {
             _dBContext = dBContext;
+            _serviceRepository = serviceRepository;
         }
         [HttpGet]
         public async Task<Result<List<GetServicesModel>>> GetAllServices()
@@ -299,26 +302,9 @@ namespace WebAppUpnQ8Api.Controllers
         {
             try
             {
-                var subService = await _dBContext.SubServicesTbls.FindAsync(id);
-                ServiceRequestsTbl serviceRequestsTbl = new ServiceRequestsTbl();
-                serviceRequestsTbl.Id = User.Identity.GetUserId();
-                serviceRequestsTbl.Sub_Service_ID = id;
-                serviceRequestsTbl.Service_Request_Date = DateTime.Now;
-                serviceRequestsTbl.Request_Status = 1;
-                serviceRequestsTbl.Requset_Code = "";
-                serviceRequestsTbl.Renewal_request = false;
-                serviceRequestsTbl.Price = subService.Sub_Service_Price;
-                await _dBContext.ServiceRequestsTbls.AddAsync(serviceRequestsTbl);
-                int idd = serviceRequestsTbl.Service_Request_ID;
-                await _dBContext.SaveChangesAsync();
-                var request = await _dBContext.ServiceRequestsTbls.FindAsync(idd);
-                string code1 = "G" + (request.Service_Request_ID + 10) + "S";
-                request.Requset_Code = code1;
-                await _dBContext.SaveChangesAsync();
+                var res = await _serviceRepository.AddSubServiceRequest(id);
 
-                //send email
-
-                return Result<string>.Success("تم تسجيل طلبك بنجاح");
+                return res;
             }
             catch
             {
@@ -328,68 +314,13 @@ namespace WebAppUpnQ8Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<Result<string>> SubscripePlan(int id, double price)//plan id   price in dollar
+        public async Task<Result<string>> SubscripePlan(int id, double price)
         {
             try
             {
-                var plan = await _dBContext.PlansTbls.FindAsync(id);
-                PlanSubscripesTbl planSubscripes = new PlanSubscripesTbl();
-                planSubscripes.Id = User.Identity.GetUserId();
-                planSubscripes.Plan_ID = id;
-                planSubscripes.Subscripe_Code = "";
-                double price1 = price / 3.3;
-                planSubscripes.Subscription_Price = price1;
-                if (plan.Price_6m * 6 == price1)
-                {
-                    planSubscripes.DurationInMonth = 6;
-                }
-                if (plan.Price_1m == price1)
-                {
-                    planSubscripes.DurationInMonth = 1;
-                }
-                if (plan.Price_1y * 12 == price1)
-                {
-                    planSubscripes.DurationInMonth = 12;
-                }
-                if (plan.Price_2y * 24 == price1)
-                {
-                    planSubscripes.DurationInMonth = 24;
-                }
+                var res = await _serviceRepository.AddPlanRequest(id, price);
 
-                planSubscripes.Subscription_Start_Date = DateTime.Now;
-                DateTime date = DateTime.Now.AddMonths((int)planSubscripes.DurationInMonth);
-                planSubscripes.Subscription_End_Date = date;
-
-                await _dBContext.PlanSubscripesTbls.AddAsync(planSubscripes);
-                int idd = planSubscripes.Plan_Subscripe_ID;
-                await _dBContext.SaveChangesAsync();
-                var subscripe = await _dBContext.PlanSubscripesTbls.FindAsync(idd);
-                string code1 = "G" + (subscripe.Plan_Subscripe_ID + 10) + "P";
-                subscripe.Subscripe_Code = code1;
-                await _dBContext.SaveChangesAsync();
-
-                //string body = string.Empty;
-                //using (StreamReader reader = new StreamReader(Server.MapPath("~/Views/Home/InvoiceEmail.html")))
-                //{
-                //    body = reader.ReadToEnd();
-                //}
-                //ApplicationUserManager UserManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                //string userid = System.Web.HttpContext.Current.User.Identity.GetUserId();
-                //AspNetUser user = db.AspNetUsers.Find(userid);
-                //body = body.Replace("{productname}", "You have subscribed to the plan :" + plan.Plan_Title);
-                //body = body.Replace("{UserName}", user.UserName);
-                //body = body.Replace("{InvoicCodeNum}", code1);
-                //body = body.Replace("{TotalPrice}", price.ToString());
-                //bool IsSendEmail = SendEmail.EmailSend(user.Email, "Thank you for completing the payment process ", body, true);
-                //if (IsSendEmail)
-                //{
-                //    return new JsonResult { Data = new { status = true } };
-                //}
-                //else
-                //{
-                //    return new JsonResult { Data = new { status = false } };
-
-                return Result<string>.Success("تم تسجيل طلبك بنجاح");
+                return res;
             }
             catch
             {
@@ -398,39 +329,14 @@ namespace WebAppUpnQ8Api.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<Result<string>> UpgradeSubService(int? id) // request id 
+        public async Task<Result<string>> UpgradeSubService(int id) // request id 
         {
             try
             {
 
-                var serviceRequestsTbl = await _dBContext.ServiceRequestsTbls.FindAsync(id);
-                serviceRequestsTbl.Service_Request_Date = DateTime.Now;
-                serviceRequestsTbl.Request_Status = 4; //طلب تجديد
-                serviceRequestsTbl.Renewal_request = true;
-                serviceRequestsTbl.Price = serviceRequestsTbl.Renewal_price;
-                await _dBContext.SaveChangesAsync();
+                var res = await _serviceRepository.UpgradeSubServiceRequest(id);
 
-                //string body = string.Empty;
-                //using (StreamReader reader = new StreamReader(Server.MapPath("~/Views/Home/InvoiceEmail.html")))
-                //{
-                //    body = reader.ReadToEnd();
-                //}
-                //ApplicationUserManager UserManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                //string userid = System.Web.HttpContext.Current.User.Identity.GetUserId();
-                //AspNetUser user = db.AspNetUsers.Find(userid);
-                //body = body.Replace("{productname}", "You have subscribed to the Service :" + subService.Sub_Service_Title);
-                //body = body.Replace("{UserName}", user.UserName);
-                //body = body.Replace("{TotalPrice}", serviceRequestsTbl.Renewal_price.ToString());
-                //bool IsSendEmail = SendEmail.EmailSend(user.Email, "Thank you for completing the payment process ", body, true);
-                //if (IsSendEmail)
-                //{
-                //    return new JsonResult { Data = new { status = true } };
-                //}
-                //else
-                //{
-                //    return new JsonResult { Data = new { status = false } };
-                //}
-                return Result<string>.Success("تم تسجيل طلبك بنجاح");
+                return res;
             }
             catch
             {

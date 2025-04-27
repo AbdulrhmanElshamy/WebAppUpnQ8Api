@@ -28,6 +28,7 @@ using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using WebAppUpnQ8Api.Services.AccountServices;
 using WebAppUpnQ8Api.Services.EmailServices;
+using WebAppUpnQ8Api.Services.DiscountServices;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -49,6 +50,7 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddHttpContextAccessor();
 var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

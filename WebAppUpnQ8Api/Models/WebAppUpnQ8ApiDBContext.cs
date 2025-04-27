@@ -54,6 +54,7 @@ namespace WebAppUpnQ8Api.Models
         public virtual DbSet<EvaluationsTbl> EvaluationsTbls { get; set; }
         public virtual DbSet<PlanSubscripeContentsTbl> PlanSubscripeContentsTbls { get; set; }
         public virtual DbSet<RefreshTokenTbl> RefreshTokenTbls { get; set; }
+        public virtual DbSet<Discounts> Discounts { get; set; }
 
 
     }

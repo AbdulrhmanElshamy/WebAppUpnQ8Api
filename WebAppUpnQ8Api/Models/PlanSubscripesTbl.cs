@@ -15,10 +15,9 @@ namespace UPNprojectApi.Models
         public int Plan_ID { get; set; }
         [ForeignKey ("DiscountsTbl")]
         public int Discount_ID { get; set; }
-        public Nullable<System.DateTime> Subscription_Start_Date { get; set; }
-        public Nullable<System.DateTime> Subscription_End_Date { get; set; }
-        public Nullable<int> DurationInMonth { get; set; }
-        public string Id { get; set; }
+        public DateTime? Subscription_Start_Date { get; set; }
+        public DateTime? Subscription_End_Date { get; set; }
+        public int? DurationInMonth { get; set; }
         public string Subscripe_Code { get; set; }
 
         //public virtual AspNetUser AspNetUser { get; set; }

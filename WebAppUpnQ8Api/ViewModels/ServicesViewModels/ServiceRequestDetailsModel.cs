@@ -13,7 +13,7 @@ namespace WebAppUpnQ8Api.ViewModels.ServicesViewModels
         //public string ServiceResponseDate { get; set; }
         public Nullable<int> Sub_Service_ID { get; set; }
         //public string Id { get; set; }
-        public Nullable<int> Request_Status { get; set; }
+        public ServiceRequestStatus? Request_Status { get; set; }
         public Nullable<System.DateTime> Service_Active_Date { get; set; }
         public Nullable<System.DateTime> Finished_Date { get; set; }
         //public string ServiceActiveDate { get; set; }

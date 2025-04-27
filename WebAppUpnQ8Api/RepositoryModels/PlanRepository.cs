@@ -338,7 +338,6 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Subscription_Start_Date = a.Subscription_Start_Date,
                         Subscription_End_Date = a.Subscription_End_Date,
                         DurationInMonth = a.DurationInMonth,
-                        Id = a.Id,
                         Subscripe_Code = a.Subscripe_Code,
                         First_Name = a.CustomersTbl.FirstName,
                         Last_Name = a.CustomersTbl.LastName,

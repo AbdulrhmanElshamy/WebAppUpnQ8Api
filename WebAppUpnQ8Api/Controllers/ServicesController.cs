@@ -11,7 +11,7 @@ namespace WebAppUpnQ8Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ServicesController : ControllerBase
     {
         private readonly IServiceRepository _serviceRepository;

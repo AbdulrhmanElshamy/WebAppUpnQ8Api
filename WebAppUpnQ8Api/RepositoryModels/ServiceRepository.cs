@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -9,13 +10,16 @@ using MimeKit;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using UPNprojectApi.Models;
 using WebAppUpnQ8Api.Helper;
 using WebAppUpnQ8Api.Models;
 using WebAppUpnQ8Api.Repository;
+using WebAppUpnQ8Api.Services.EmailServices;
 using WebAppUpnQ8Api.ViewModels;
 using WebAppUpnQ8Api.ViewModels.HomeViewModels;
 using WebAppUpnQ8Api.ViewModels.ServicesViewModels;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebAppUpnQ8Api.RepositoryModels
@@ -24,12 +28,17 @@ namespace WebAppUpnQ8Api.RepositoryModels
     {
         private readonly WebAppUpnQ8ApiDBContext _dBContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
-
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IEmailSender _emailSender;
         public ServiceRepository(WebAppUpnQ8ApiDBContext dBContext,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IHttpContextAccessor contextAccessor,
+            IEmailSender emailSender)
         {
             _dBContext = dBContext;
             _webHostEnvironment = webHostEnvironment;
+            _contextAccessor = contextAccessor;
+            _emailSender = emailSender;
         }
 
         public async Task<Result<string>> AcceptServiceRequest(int id, RequestFileDescriptionsModel requestFiles)
@@ -39,7 +48,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 var serviceRequest = await _dBContext.ServiceRequestsTbls.FindAsync(id);
                 if (serviceRequest != null)
                 {
-                    serviceRequest.Request_Status = 2;
+                    serviceRequest.Request_Status = ServiceRequestStatus.finshed;
                     serviceRequest.Service_Active_Date = DateTime.Now;
                     serviceRequest.Finished_Date = requestFiles.Finished_Date;
 
@@ -226,7 +235,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     .Take(query.PageSize)
                     .Select(a => new ServiceRequestDetailsModel
                     {
-                        Service_Request_ID = a.Service_Request_ID,
+                        Service_Request_ID = a.Id,
                         Customer_ID = a.Customer_ID,
                         Service_Request_Date = a.Service_Request_Date,
                         Service_Response_Date = a.Service_Response_Date,
@@ -361,7 +370,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     .Take(query.PageSize)
                     .Select(a => new ServiceRequestDetailsModel
                     {
-                        Service_Request_ID = a.Service_Request_ID,
+                        Service_Request_ID = a.Id,
                         Customer_ID = a.Customer_ID,
                         Service_Request_Date = a.Service_Request_Date,
                         Service_Response_Date = a.Service_Response_Date,
@@ -736,11 +745,11 @@ namespace WebAppUpnQ8Api.RepositoryModels
             try
             {
 
-                var serviceRequests = await _dBContext.ServiceRequestsTbls.Where(a => a.Service_Request_ID == id).Include(a => a.CustomersTbl)
+                var serviceRequests = await _dBContext.ServiceRequestsTbls.Where(a => a.Id == id).Include(a => a.CustomersTbl)
                     .Include(a => a.SubServicesTbl).ThenInclude(a => a.ServicesTbl).Select(a =>
                 new ServiceRequestDetailsModel()
                 {
-                    Service_Request_ID = a.Service_Request_ID,
+                    Service_Request_ID = a.Id,
                     Customer_ID = a.Customer_ID,
                     Service_Request_Date = a.Service_Request_Date,
                     Service_Response_Date = a.Service_Response_Date,
@@ -774,6 +783,153 @@ namespace WebAppUpnQ8Api.RepositoryModels
             }
         }
 
+        public async Task<Result<string>> AddSubServiceRequest(int subServiceId)
+        {
+            var subservice = await _dBContext.SubServicesTbls.FindAsync(subServiceId);
 
+            if(subservice is null)
+                return Result<string>.Failed("عذرا لم يتم ايجاد العنصر");
+
+
+            var userId = _contextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _dBContext.Users.FindAsync(userId);
+
+            var code = Guid.NewGuid().ToString().Substring(0,8);
+
+            var requst = new ServiceRequestsTbl
+            {
+                Customer_ID = userId,
+                Price = subservice.Sub_Service_Price,
+                Service_Request_Date = DateTime.Now,
+                Sub_Service_ID = subservice.Sub_Service_ID,
+                Requset_Code = code,
+            };
+
+
+            await _dBContext.AddAsync(requst);
+            await _dBContext.SaveChangesAsync();
+
+            string body = string.Empty;
+            using (StreamReader reader = new StreamReader("ViewModels/SendServiceRequestCode.html"))
+            {
+                body = reader.ReadToEnd();
+            }
+            body = body.Replace("{code}", code);
+            body = body.Replace("{UserName}", user.UserName);
+
+            var mail = new MailData
+            {
+                EmailToId = user.Email,
+                EmailToName = user.FirstName ?? "",
+                EmailSubject = "Service Request Code",
+                EmailBody = body
+            };
+
+            await _emailSender.SendEmailAsync(mail);
+
+            return Result<string>.Success("Request Added Check Your Email");
+
+        }
+
+        public async Task<Result<string>> AddPlanRequest(int subServiceId, double price)
+        {
+            var plan = await _dBContext.PlansTbls.FindAsync(subServiceId);
+            
+            if(plan is null)
+            return Result<string>.Failed("عذرا لم يتم ايجاد العنصر");
+
+            var userId = _contextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _dBContext.Users.FindAsync(userId);
+
+
+            PlanSubscripesTbl planSubscripes = new PlanSubscripesTbl();
+            planSubscripes.Plan_ID = plan.Plan_ID;
+            planSubscripes.Subscripe_Code = "";
+            double price1 = price / 3.3;
+            planSubscripes.Customer_ID = userId;
+            planSubscripes.Subscription_Price = price1;
+            if (plan.Price_6m * 6 == price1)
+            {
+                planSubscripes.DurationInMonth = 6;
+            }
+            if (plan.Price_1m == price1)
+            {
+                planSubscripes.DurationInMonth = 1;
+            }
+            if (plan.Price_1y * 12 == price1)
+            {
+                planSubscripes.DurationInMonth = 12;
+            }
+            if (plan.Price_2y * 24 == price1)
+            {
+                planSubscripes.DurationInMonth = 24;
+            }
+
+            planSubscripes.Subscription_Start_Date = DateTime.Now;
+            DateTime date = DateTime.Now.AddMonths((int)planSubscripes.DurationInMonth);
+            planSubscripes.Subscription_End_Date = date;
+
+            planSubscripes.Subscripe_Code = Guid.NewGuid().ToString().Substring(0,8);
+
+            await _dBContext.PlanSubscripesTbls.AddAsync(planSubscripes);
+
+            await _dBContext.SaveChangesAsync();
+
+            string body = string.Empty;
+            using (StreamReader reader = new StreamReader("ViewModels/SendPlaneRequestCode.html"))
+            {
+                body = reader.ReadToEnd();
+            }
+            body = body.Replace("{code}", planSubscripes.Subscripe_Code);
+            body = body.Replace("{UserName}", user.UserName);
+
+            var mail = new MailData
+            {
+                EmailToId = user.Email,
+                EmailToName = user.FirstName ?? "",
+                EmailSubject = "Service Request Code",
+                EmailBody = body
+            };
+
+            await _emailSender.SendEmailAsync(mail);
+
+            return Result<string>.Success("Request Added Check Your Email");
+        }
+
+        public async Task<Result<string>> UpgradeSubServiceRequest(int subServiceId)
+        {
+
+            var serviceRequestsTbl = await _dBContext.ServiceRequestsTbls.FindAsync(subServiceId);
+            serviceRequestsTbl.Service_Request_Date = DateTime.Now;
+            serviceRequestsTbl.Request_Status = ServiceRequestStatus.Renewal;
+            serviceRequestsTbl.Renewal_request = true;
+            serviceRequestsTbl.Price = serviceRequestsTbl.Renewal_price;
+            _dBContext.Update(serviceRequestsTbl);
+            await _dBContext.SaveChangesAsync();
+
+            var user = await _dBContext.Users.FindAsync(serviceRequestsTbl.Customer_ID);
+
+            string body = string.Empty;
+            using (StreamReader reader = new StreamReader("ViewModels/SendServiceRequestCode.html"))
+            {
+                body = reader.ReadToEnd();
+            }
+            body = body.Replace("{code}", serviceRequestsTbl.Requset_Code);
+            body = body.Replace("{UserName}", user.UserName);
+
+            var mail = new MailData
+            {
+                EmailToId = user.Email,
+                EmailToName = user.FirstName ?? "",
+                EmailSubject = "Service Request Code",
+                EmailBody = body
+            };
+
+            await _emailSender.SendEmailAsync(mail);
+
+            return Result<string>.Success("Request Added Check Your Email");
+        }
     }
 }

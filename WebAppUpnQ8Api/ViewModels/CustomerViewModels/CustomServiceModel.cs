@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using UPNprojectApi.Models;
 
 namespace WebAppUpnQ8Api.ViewModels.CustomerViewModels
 {
@@ -11,7 +12,7 @@ namespace WebAppUpnQ8Api.ViewModels.CustomerViewModels
         public Nullable<System.DateTime> Service_Response_Date { get; set; }
         public int Sub_Service_ID { get; set; }
         public string Sub_Service_Title { get; set; }
-        public Nullable<int> Request_Status { get; set; }
+        public ServiceRequestStatus? Request_Status { get; set; }
         public Nullable<System.DateTime> Service_Active_Date { get; set; }
         public Nullable<double> Price { get; set; }
         public string? Requset_Code { get; set; }

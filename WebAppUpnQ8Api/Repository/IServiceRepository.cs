@@ -20,6 +20,9 @@ namespace WebAppUpnQ8Api.Repository
         Task<Result<string>> AddSubService(SubServiceDetailsModel data , IFormFile upload);
         Task<Result<string>> EditSubService(SubServiceDetailsModel data, IFormFile upload);
         Task<Result<string>> DeleteSubService(int id);
+        Task<Result<string>> AddSubServiceRequest(int subServiceId);
+        Task<Result<string>> UpgradeSubServiceRequest(int subServiceId);
+        Task<Result<string>> AddPlanRequest(int subServiceId, double price);
 
 
         Task<Result<PagedResult<SubFeatureModel>>> AllSubFeatures(SubFeatureQueryParameters query);

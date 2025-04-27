@@ -81,7 +81,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         },
                         customServices = a.ServiceRequestsTbls.Select(b => new CustomServiceModel 
                                 {
-                                   Service_Request_ID = b.Service_Request_ID,
+                                   Service_Request_ID = b.Id,
                             Customer_ID = b.Customer_ID,
                             Service_Request_Statues = b.Service_Request_Statues,
                             Service_Request_Date = b.Service_Request_Date,
