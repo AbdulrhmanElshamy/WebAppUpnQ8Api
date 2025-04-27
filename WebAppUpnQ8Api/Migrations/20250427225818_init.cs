@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WebAppUpnQ8Api.Migrations
 {
     /// <inheritdoc />
-    public partial class test3 : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "CompanyBrandsTbls",
                 columns: table => new
@@ -56,7 +70,7 @@ namespace WebAppUpnQ8Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DiscountsTbls",
+                name: "DiscountsTbl",
                 columns: table => new
                 {
                     Discount_ID = table.Column<int>(type: "int", nullable: false)
@@ -69,7 +83,7 @@ namespace WebAppUpnQ8Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DiscountsTbls", x => x.Discount_ID);
+                    table.PrimaryKey("PK_DiscountsTbl", x => x.Discount_ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -323,6 +337,20 @@ namespace WebAppUpnQ8Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokenTbls",
+                columns: table => new
+                {
+                    Token = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokenTbls", x => x.Token);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ServicesTbls",
                 columns: table => new
                 {
@@ -333,7 +361,8 @@ namespace WebAppUpnQ8Api.Migrations
                     Service_Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Service_Description_Ar = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Icon_Code = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    IconLight = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IconDark = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -356,6 +385,27 @@ namespace WebAppUpnQ8Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CitiesTbls",
                 columns: table => new
                 {
@@ -373,7 +423,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Country_ID,
                         principalTable: "CountriesTbls",
                         principalColumn: "Country_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -393,7 +443,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Country_ID,
                         principalTable: "CountriesTbls",
                         principalColumn: "Country_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -414,7 +464,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Maintinance_Contract_ID,
                         principalTable: "MaintinanceContractsTbls",
                         principalColumn: "Maintinance_Contract_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -435,7 +485,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Maintinance_Contract_ID,
                         principalTable: "MaintinanceContractsTbls",
                         principalColumn: "Maintinance_Contract_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -457,13 +507,13 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Content_ID,
                         principalTable: "ContentsTbls",
                         principalColumn: "Content_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PlanContentsTbls_PlansTbls_Plan_ID",
                         column: x => x.Plan_ID,
                         principalTable: "PlansTbls",
                         principalColumn: "Plan_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -485,7 +535,31 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Product_Type_ID,
                         principalTable: "ProductTypesTbls",
                         principalColumn: "Product_Type_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discounts",
+                columns: table => new
+                {
+                    Discount_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DiscountPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description_Ar = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Service_ID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discounts", x => x.Discount_ID);
+                    table.ForeignKey(
+                        name: "FK_Discounts_ServicesTbls_Service_ID",
+                        column: x => x.Service_ID,
+                        principalTable: "ServicesTbls",
+                        principalColumn: "Service_ID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -510,7 +584,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Service_ID,
                         principalTable: "ServicesTbls",
                         principalColumn: "Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -534,7 +608,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Service_ID,
                         principalTable: "ServicesTbls",
                         principalColumn: "Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -557,49 +631,54 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Service_ID,
                         principalTable: "ServicesTbls",
                         principalColumn: "Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomersTbls",
+                name: "AspNetUsers",
                 columns: table => new
                 {
-                    Customer_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    First_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Last_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Birth_Day_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Phone_Number_1 = table.Column<long>(type: "bigint", nullable: true),
-                    Phone_Number_2 = table.Column<long>(type: "bigint", nullable: true),
-                    Address_1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address_2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country_ID = table.Column<int>(type: "int", nullable: true),
-                    City_ID = table.Column<int>(type: "int", nullable: false),
-                    User_ID = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Gender = table.Column<bool>(type: "bit", nullable: true),
-                    Register_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password_Confirm = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Code_Number_ID_1 = table.Column<int>(type: "int", nullable: false),
-                    IP_Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SecondPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecondAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountryId = table.Column<int>(type: "int", nullable: true),
+                    CityId = table.Column<int>(type: "int", nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Gender = table.Column<bool>(type: "bit", nullable: false),
+                    RegisterDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CodeNumberId = table.Column<int>(type: "int", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomersTbls", x => x.Customer_ID);
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CustomersTbls_CitiesTbls_City_ID",
-                        column: x => x.City_ID,
+                        name: "FK_AspNetUsers_CitiesTbls_CityId",
+                        column: x => x.CityId,
                         principalTable: "CitiesTbls",
-                        principalColumn: "City_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "City_ID");
                     table.ForeignKey(
-                        name: "FK_CustomersTbls_CodeNumbersTbls_Code_Number_ID_1",
-                        column: x => x.Code_Number_ID_1,
+                        name: "FK_AspNetUsers_CodeNumbersTbls_CodeNumberId",
+                        column: x => x.CodeNumberId,
                         principalTable: "CodeNumbersTbls",
-                        principalColumn: "Code_Number_ID",
-                        onDelete: ReferentialAction.NoAction);
+                        principalColumn: "Code_Number_ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -628,13 +707,13 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Company_Brand_ID,
                         principalTable: "CompanyBrandsTbls",
                         principalColumn: "Company_Brand_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ProductsTbls_ProductSubTypesTbls_Product_Sub_Type_ID",
                         column: x => x.Product_Sub_Type_ID,
                         principalTable: "ProductSubTypesTbls",
                         principalColumn: "Product_Sub_Type_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -655,7 +734,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Product_Sub_Type_ID,
                         principalTable: "ProductSubTypesTbls",
                         principalColumn: "Product_Sub_Type_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -676,7 +755,92 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Sub_Service_ID,
                         principalTable: "SubServicesTbls",
                         principalColumn: "Sub_Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -686,24 +850,24 @@ namespace WebAppUpnQ8Api.Migrations
                     Maintinance_Request_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Maintinance_Contract_ID = table.Column<int>(type: "int", nullable: false),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Request_Statues = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MaintinanceRequestsTbls", x => x.Maintinance_Request_ID);
                     table.ForeignKey(
-                        name: "FK_MaintinanceRequestsTbls_CustomersTbls_Customer_ID",
+                        name: "FK_MaintinanceRequestsTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MaintinanceRequestsTbls_MaintinanceContractsTbls_Maintinance_Contract_ID",
                         column: x => x.Maintinance_Contract_ID,
                         principalTable: "MaintinanceContractsTbls",
                         principalColumn: "Maintinance_Contract_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -712,52 +876,50 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     Plan_Subscripe_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Subscription_Price = table.Column<double>(type: "float", nullable: true),
                     Plan_ID = table.Column<int>(type: "int", nullable: false),
                     Discount_ID = table.Column<int>(type: "int", nullable: false),
                     Subscription_Start_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Subscription_End_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DurationInMonth = table.Column<int>(type: "int", nullable: true),
-                    Id = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Subscripe_Code = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlanSubscripesTbls", x => x.Plan_Subscripe_ID);
                     table.ForeignKey(
-                        name: "FK_PlanSubscripesTbls_CustomersTbls_Customer_ID",
+                        name: "FK_PlanSubscripesTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_PlanSubscripesTbls_DiscountsTbls_Discount_ID",
+                        name: "FK_PlanSubscripesTbls_DiscountsTbl_Discount_ID",
                         column: x => x.Discount_ID,
-                        principalTable: "DiscountsTbls",
+                        principalTable: "DiscountsTbl",
                         principalColumn: "Discount_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PlanSubscripesTbls_PlansTbls_Plan_ID",
                         column: x => x.Plan_ID,
                         principalTable: "PlansTbls",
                         principalColumn: "Plan_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ServiceRequestsTbls",
                 columns: table => new
                 {
-                    Service_Request_ID = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
-                    Service_Request_Statues = table.Column<bool>(type: "bit", nullable: true),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Service_Request_Statues = table.Column<bool>(type: "bit", nullable: false),
                     Service_Request_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Service_Response_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Sub_Service_ID = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Request_Status = table.Column<int>(type: "int", nullable: true),
+                    Request_Status = table.Column<int>(type: "int", nullable: false),
                     Service_Active_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: true),
                     Requset_Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -767,19 +929,19 @@ namespace WebAppUpnQ8Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceRequestsTbls", x => x.Service_Request_ID);
+                    table.PrimaryKey("PK_ServiceRequestsTbls", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ServiceRequestsTbls_CustomersTbls_Customer_ID",
+                        name: "FK_ServiceRequestsTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ServiceRequestsTbls_SubServicesTbls_Sub_Service_ID",
                         column: x => x.Sub_Service_ID,
                         principalTable: "SubServicesTbls",
                         principalColumn: "Sub_Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -789,7 +951,7 @@ namespace WebAppUpnQ8Api.Migrations
                     Special_Request_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Service_ID = table.Column<int>(type: "int", nullable: false),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     User_ID = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Request_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<bool>(type: "bit", nullable: true),
@@ -799,17 +961,17 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     table.PrimaryKey("PK_SpecialRequestsTbls", x => x.Special_Request_ID);
                     table.ForeignKey(
-                        name: "FK_SpecialRequestsTbls_CustomersTbls_Customer_ID",
+                        name: "FK_SpecialRequestsTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SpecialRequestsTbls_ServicesTbls_Service_ID",
                         column: x => x.Service_ID,
                         principalTable: "ServicesTbls",
                         principalColumn: "Service_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -818,7 +980,7 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     Subscription_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Subscription_Price = table.Column<double>(type: "float", nullable: true),
                     Princing_Duration_ID = table.Column<int>(type: "int", nullable: true),
                     Discount_ID = table.Column<int>(type: "int", nullable: false),
@@ -830,23 +992,23 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     table.PrimaryKey("PK_SubscriptionsTbls", x => x.Subscription_ID);
                     table.ForeignKey(
-                        name: "FK_SubscriptionsTbls_CustomersTbls_Customer_ID",
+                        name: "FK_SubscriptionsTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_SubscriptionsTbls_DiscountsTbls_Discount_ID",
+                        name: "FK_SubscriptionsTbls_DiscountsTbl_Discount_ID",
                         column: x => x.Discount_ID,
-                        principalTable: "DiscountsTbls",
+                        principalTable: "DiscountsTbl",
                         principalColumn: "Discount_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SubscriptionsTbls_PaymentTypesTbls_Payment_Type_ID",
                         column: x => x.Payment_Type_ID,
                         principalTable: "PaymentTypesTbls",
                         principalColumn: "Payment_Type_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -855,7 +1017,7 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     Testmonial_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Customer_ID = table.Column<int>(type: "int", nullable: false),
+                    Customer_ID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     User_ID = table.Column<int>(type: "int", nullable: true),
                     Rating_Stars = table.Column<int>(type: "int", nullable: true),
                     Testmonial_Note = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -864,11 +1026,11 @@ namespace WebAppUpnQ8Api.Migrations
                 {
                     table.PrimaryKey("PK_TestmonialsTbls", x => x.Testmonial_ID);
                     table.ForeignKey(
-                        name: "FK_TestmonialsTbls_CustomersTbls_Customer_ID",
+                        name: "FK_TestmonialsTbls_AspNetUsers_Customer_ID",
                         column: x => x.Customer_ID,
-                        principalTable: "CustomersTbls",
-                        principalColumn: "Customer_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -891,7 +1053,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Product_ID,
                         principalTable: "ProductsTbls",
                         principalColumn: "Product_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -913,7 +1075,7 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Product_ID,
                         principalTable: "ProductsTbls",
                         principalColumn: "Product_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -935,13 +1097,13 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Product_Sub_Type_Specific_ID,
                         principalTable: "ProductSubTypeSpecificationsTbls",
                         principalColumn: "Product_Sub_Type_Specific_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ProductSpecificationsTbls_ProductsTbls_Product_ID",
                         column: x => x.Product_ID,
                         principalTable: "ProductsTbls",
                         principalColumn: "Product_ID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -962,13 +1124,13 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Content_ID,
                         principalTable: "ContentsTbls",
                         principalColumn: "Content_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PlanSubscripeContentsTbls_PlanSubscripesTbls_Plan_Subscripe_ID",
                         column: x => x.Plan_Subscripe_ID,
                         principalTable: "PlanSubscripesTbls",
                         principalColumn: "Plan_Subscripe_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -988,14 +1150,63 @@ namespace WebAppUpnQ8Api.Migrations
                         column: x => x.Special_Feature_ID,
                         principalTable: "SpecialFeaturesTbls",
                         principalColumn: "Special_Feature_ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SpecialRequestFeaturesTbls_SpecialRequestsTbls_Special_Request_ID",
                         column: x => x.Special_Request_ID,
                         principalTable: "SpecialRequestsTbls",
                         principalColumn: "Special_Request_ID",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CityId",
+                table: "AspNetUsers",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CodeNumberId",
+                table: "AspNetUsers",
+                column: "CodeNumberId");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CitiesTbls_Country_ID",
@@ -1018,14 +1229,9 @@ namespace WebAppUpnQ8Api.Migrations
                 column: "Maintinance_Contract_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomersTbls_City_ID",
-                table: "CustomersTbls",
-                column: "City_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CustomersTbls_Code_Number_ID_1",
-                table: "CustomersTbls",
-                column: "Code_Number_ID_1");
+                name: "IX_Discounts_Service_ID",
+                table: "Discounts",
+                column: "Service_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EvaluationsTbls_Product_ID",
@@ -1187,10 +1393,28 @@ namespace WebAppUpnQ8Api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
                 name: "ContractConditionsTbls");
 
             migrationBuilder.DropTable(
                 name: "ContractServicesTbls");
+
+            migrationBuilder.DropTable(
+                name: "Discounts");
 
             migrationBuilder.DropTable(
                 name: "DurationsTbls");
@@ -1235,6 +1459,9 @@ namespace WebAppUpnQ8Api.Migrations
                 name: "ProductSpecificationsTbls");
 
             migrationBuilder.DropTable(
+                name: "RefreshTokenTbls");
+
+            migrationBuilder.DropTable(
                 name: "RequestsQuoteTbls");
 
             migrationBuilder.DropTable(
@@ -1254,6 +1481,9 @@ namespace WebAppUpnQ8Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "TestmonialsTbls");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "MaintinanceContractsTbls");
@@ -1283,7 +1513,7 @@ namespace WebAppUpnQ8Api.Migrations
                 name: "PaymentTypesTbls");
 
             migrationBuilder.DropTable(
-                name: "DiscountsTbls");
+                name: "DiscountsTbl");
 
             migrationBuilder.DropTable(
                 name: "PlansTbls");
@@ -1295,7 +1525,7 @@ namespace WebAppUpnQ8Api.Migrations
                 name: "ProductSubTypesTbls");
 
             migrationBuilder.DropTable(
-                name: "CustomersTbls");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "ServicesTbls");

@@ -326,6 +326,41 @@ namespace WebAppUpnQ8Api.Migrations
                     b.ToTable("CountriesTbls");
                 });
 
+            modelBuilder.Entity("UPNprojectApi.Models.Discounts", b =>
+                {
+                    b.Property<int>("Discount_ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Discount_ID"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description_Ar")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Service_ID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Discount_ID");
+
+                    b.HasIndex("Service_ID");
+
+                    b.ToTable("Discounts");
+                });
+
             modelBuilder.Entity("UPNprojectApi.Models.DiscountsTbl", b =>
                 {
                     b.Property<int>("Discount_ID")
@@ -352,7 +387,7 @@ namespace WebAppUpnQ8Api.Migrations
 
                     b.HasKey("Discount_ID");
 
-                    b.ToTable("DiscountsTbls");
+                    b.ToTable("DiscountsTbl");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.DurationsTbl", b =>
@@ -964,9 +999,6 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<int?>("DurationInMonth")
                         .HasColumnType("int");
 
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Plan_ID")
                         .HasColumnType("int");
 
@@ -1294,11 +1326,11 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.ServiceRequestsTbl", b =>
                 {
-                    b.Property<int>("Service_Request_ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Service_Request_ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Customer_ID")
                         .IsRequired()
@@ -1306,9 +1338,6 @@ namespace WebAppUpnQ8Api.Migrations
 
                     b.Property<DateTime?>("Finished_Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Price")
                         .HasColumnType("float");
@@ -1319,7 +1348,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<bool?>("Renewal_request")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Request_Status")
+                    b.Property<int>("Request_Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Requset_Code")
@@ -1332,7 +1361,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<DateTime?>("Service_Request_Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("Service_Request_Statues")
+                    b.Property<bool>("Service_Request_Statues")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("Service_Response_Date")
@@ -1341,7 +1370,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<int>("Sub_Service_ID")
                         .HasColumnType("int");
 
-                    b.HasKey("Service_Request_ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("Customer_ID");
 
@@ -1358,7 +1387,11 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Service_ID"));
 
-                    b.Property<string>("Icon_Code")
+                    b.Property<string>("IconDark")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconLight")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1857,6 +1890,17 @@ namespace WebAppUpnQ8Api.Migrations
                         .IsRequired();
 
                     b.Navigation("MaintinanceContractsTbl");
+                });
+
+            modelBuilder.Entity("UPNprojectApi.Models.Discounts", b =>
+                {
+                    b.HasOne("UPNprojectApi.Models.ServicesTbl", "Service")
+                        .WithMany()
+                        .HasForeignKey("Service_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.EvaluationsTbl", b =>

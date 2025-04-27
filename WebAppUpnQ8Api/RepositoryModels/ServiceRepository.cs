@@ -797,10 +797,19 @@ namespace WebAppUpnQ8Api.RepositoryModels
 
             var code = Guid.NewGuid().ToString().Substring(0,8);
 
+
+            var serviceDiscount = await _dBContext.Discounts.FirstOrDefaultAsync(c => c.Service_ID == subservice.Service_ID && c.StartDate.Value.Date >= DateTime.Now.Date && c.EndDate.Value.Date <= DateTime.Now.Date);
+
+            var Price = subservice.Sub_Service_Price;
+
+
+            if (serviceDiscount is not null)
+                Price = Price - (Price  * (double)serviceDiscount.DiscountPercentage);
+
             var requst = new ServiceRequestsTbl
             {
                 Customer_ID = userId,
-                Price = subservice.Sub_Service_Price,
+                Price = Price,
                 Service_Request_Date = DateTime.Now,
                 Sub_Service_ID = subservice.Sub_Service_ID,
                 Requset_Code = code,

@@ -6,7 +6,6 @@ namespace UPNprojectApi.Models
 {
     public class ServiceRequestsTbl
     {
-        [Key]
         public int Id { get; set; }
         [ForeignKey ("CustomersTbl")]
         public string Customer_ID { get; set; }

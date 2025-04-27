@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Images\ServicesImg\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

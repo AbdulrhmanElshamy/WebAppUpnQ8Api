@@ -12,8 +12,8 @@ using WebAppUpnQ8Api.Models;
 namespace WebAppUpnQ8Api.Migrations
 {
     [DbContext(typeof(WebAppUpnQ8ApiDBContext))]
-    [Migration("20241123234606_test7")]
-    partial class test7
+    [Migration("20250427225818_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -329,85 +329,39 @@ namespace WebAppUpnQ8Api.Migrations
                     b.ToTable("CountriesTbls");
                 });
 
-            modelBuilder.Entity("UPNprojectApi.Models.CustomersTbl", b =>
+            modelBuilder.Entity("UPNprojectApi.Models.Discounts", b =>
                 {
-                    b.Property<int>("Customer_ID")
+                    b.Property<int>("Discount_ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Customer_ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Discount_ID"));
 
-                    b.Property<string>("Address_1")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Address_2")
+                    b.Property<string>("Description_Ar")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("Birth_Day_Date")
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("City_ID")
+                    b.Property<int>("Service_ID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Code_Number_ID_1")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Country_ID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("First_Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("Gender")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("IP_Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Last_Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password_Confirm")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("Phone_Number_1")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("Phone_Number_2")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("Register_Date")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("User_ID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Discount_ID");
 
-                    b.HasKey("Customer_ID");
+                    b.HasIndex("Service_ID");
 
-                    b.HasIndex("City_ID");
-
-                    b.HasIndex("Code_Number_ID_1");
-
-                    b.ToTable("CustomersTbls");
+                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.DiscountsTbl", b =>
@@ -436,7 +390,7 @@ namespace WebAppUpnQ8Api.Migrations
 
                     b.HasKey("Discount_ID");
 
-                    b.ToTable("DiscountsTbls");
+                    b.ToTable("DiscountsTbl");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.DurationsTbl", b =>
@@ -903,8 +857,9 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Maintinance_Request_ID"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Maintinance_Contract_ID")
                         .HasColumnType("int");
@@ -1037,17 +992,15 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Plan_Subscripe_ID"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Discount_ID")
                         .HasColumnType("int");
 
                     b.Property<int?>("DurationInMonth")
                         .HasColumnType("int");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Plan_ID")
                         .HasColumnType("int");
@@ -1376,20 +1329,18 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.ServiceRequestsTbl", b =>
                 {
-                    b.Property<int>("Service_Request_ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Service_Request_ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("Finished_Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Price")
                         .HasColumnType("float");
@@ -1400,7 +1351,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<bool?>("Renewal_request")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Request_Status")
+                    b.Property<int>("Request_Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Requset_Code")
@@ -1413,7 +1364,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<DateTime?>("Service_Request_Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("Service_Request_Statues")
+                    b.Property<bool>("Service_Request_Statues")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("Service_Response_Date")
@@ -1422,7 +1373,7 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<int>("Sub_Service_ID")
                         .HasColumnType("int");
 
-                    b.HasKey("Service_Request_ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("Customer_ID");
 
@@ -1439,7 +1390,11 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Service_ID"));
 
-                    b.Property<string>("Icon_Code")
+                    b.Property<string>("IconDark")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconLight")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1561,8 +1516,9 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Special_Request_ID"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("Request_Date")
                         .HasColumnType("datetime2");
@@ -1657,8 +1613,9 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Subscription_ID"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Discount_ID")
                         .HasColumnType("int");
@@ -1697,8 +1654,9 @@ namespace WebAppUpnQ8Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Testmonial_ID"));
 
-                    b.Property<int>("Customer_ID")
-                        .HasColumnType("int");
+                    b.Property<string>("Customer_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("Rating_Stars")
                         .HasColumnType("int");
@@ -1725,9 +1683,21 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CodeNumberId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CountryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -1735,6 +1705,21 @@ namespace WebAppUpnQ8Api.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Gender")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -1759,6 +1744,15 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("RegisterDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SecondAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondPhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -1771,6 +1765,10 @@ namespace WebAppUpnQ8Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("CodeNumberId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -1780,6 +1778,26 @@ namespace WebAppUpnQ8Api.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("WebAppUpnQ8Api.Models.RefreshTokenTbl", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Token");
+
+                    b.ToTable("RefreshTokenTbls");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1877,23 +1895,15 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Navigation("MaintinanceContractsTbl");
                 });
 
-            modelBuilder.Entity("UPNprojectApi.Models.CustomersTbl", b =>
+            modelBuilder.Entity("UPNprojectApi.Models.Discounts", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CitiesTbl", "CitiesTbl")
-                        .WithMany("CustomersTbls")
-                        .HasForeignKey("City_ID")
+                    b.HasOne("UPNprojectApi.Models.ServicesTbl", "Service")
+                        .WithMany()
+                        .HasForeignKey("Service_ID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UPNprojectApi.Models.CodeNumbersTbl", "CodeNumbersTbl")
-                        .WithMany("CustomersTbls")
-                        .HasForeignKey("Code_Number_ID_1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CitiesTbl");
-
-                    b.Navigation("CodeNumbersTbl");
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.EvaluationsTbl", b =>
@@ -1909,7 +1919,7 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.MaintinanceRequestsTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("MaintinanceRequestsTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1966,7 +1976,7 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.PlanSubscripesTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("PlanSubscripesTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2075,7 +2085,7 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.ServiceRequestsTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("ServiceRequestsTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2124,7 +2134,7 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.SpecialRequestsTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("SpecialRequestsTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2165,7 +2175,7 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.SubscriptionsTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("SubscriptionsTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2192,13 +2202,28 @@ namespace WebAppUpnQ8Api.Migrations
 
             modelBuilder.Entity("UPNprojectApi.Models.TestmonialsTbl", b =>
                 {
-                    b.HasOne("UPNprojectApi.Models.CustomersTbl", "CustomersTbl")
+                    b.HasOne("WebAppUpnQ8Api.Models.ApplicationUser", "CustomersTbl")
                         .WithMany("TestmonialsTbls")
                         .HasForeignKey("Customer_ID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CustomersTbl");
+                });
+
+            modelBuilder.Entity("WebAppUpnQ8Api.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("UPNprojectApi.Models.CitiesTbl", "CitiesTbl")
+                        .WithMany("CustomersTbls")
+                        .HasForeignKey("CityId");
+
+                    b.HasOne("UPNprojectApi.Models.CodeNumbersTbl", "CodeNumbersTbl")
+                        .WithMany("CustomersTbls")
+                        .HasForeignKey("CodeNumberId");
+
+                    b.Navigation("CitiesTbl");
+
+                    b.Navigation("CodeNumbersTbl");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.CitiesTbl", b =>
@@ -2228,21 +2253,6 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Navigation("CitiesTbls");
 
                     b.Navigation("CodeNumbersTbls");
-                });
-
-            modelBuilder.Entity("UPNprojectApi.Models.CustomersTbl", b =>
-                {
-                    b.Navigation("MaintinanceRequestsTbls");
-
-                    b.Navigation("PlanSubscripesTbls");
-
-                    b.Navigation("ServiceRequestsTbls");
-
-                    b.Navigation("SpecialRequestsTbls");
-
-                    b.Navigation("SubscriptionsTbls");
-
-                    b.Navigation("TestmonialsTbls");
                 });
 
             modelBuilder.Entity("UPNprojectApi.Models.DiscountsTbl", b =>
@@ -2330,6 +2340,21 @@ namespace WebAppUpnQ8Api.Migrations
                     b.Navigation("ServiceRequestsTbls");
 
                     b.Navigation("SubFeaturesTbls");
+                });
+
+            modelBuilder.Entity("WebAppUpnQ8Api.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("MaintinanceRequestsTbls");
+
+                    b.Navigation("PlanSubscripesTbls");
+
+                    b.Navigation("ServiceRequestsTbls");
+
+                    b.Navigation("SpecialRequestsTbls");
+
+                    b.Navigation("SubscriptionsTbls");
+
+                    b.Navigation("TestmonialsTbls");
                 });
 #pragma warning restore 612, 618
         }

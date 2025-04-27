@@ -18,7 +18,7 @@ namespace UPNprojectApi.Models
         public virtual ICollection<SpecialFeaturesTbl> SpecialFeaturesTbls { get; set; }
         public virtual ICollection<SpecialRequestsTbl> SpecialRequestsTbls { get; set; }
         public virtual ICollection<SubServicesTbl> SubServicesTbls { get; set; }
-        public virtual ICollection<Discounts> DiscountsTbls { get; set; }
+        //public virtual ICollection<Discounts> DiscountsTbls { get; set; }
     }
 
 }

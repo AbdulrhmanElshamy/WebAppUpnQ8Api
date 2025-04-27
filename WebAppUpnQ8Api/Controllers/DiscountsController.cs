@@ -9,7 +9,7 @@ namespace WebAppUpnQ8Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class DiscountsController : ControllerBase
     {
         private readonly IDiscountService _discountService;
@@ -20,14 +20,14 @@ namespace WebAppUpnQ8Api.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<Discounts>>> GetAll()
+        public async Task<ActionResult<IEnumerable<DiscountDto>>> GetAll()
         {
             var discounts = await _discountService.GetAllAsync();
             return Ok(discounts);
         }
 
         [HttpGet("GetById/{id}")]
-        public async Task<ActionResult<Discounts>> GetById(int id)
+        public async Task<ActionResult<DiscountDto>> GetById(int id)
         {
             var discount = await _discountService.GetByIdAsync(id);
             if (discount == null)
@@ -37,7 +37,7 @@ namespace WebAppUpnQ8Api.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<Result<string>> Create(Discounts discount)
+        public async Task<Result<string>> Create(DiscountDto discount)
         {
 
             var res = await _discountService.AddAsync(discount);
@@ -45,7 +45,7 @@ namespace WebAppUpnQ8Api.Controllers
         }
 
         [HttpPost("Update")]
-        public async Task<Result<string>> Update(Discounts discount)
+        public async Task<Result<string>> Update(DiscountDto discount)
         {
 
             var res = await _discountService.UpdateAsync(discount);
