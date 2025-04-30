@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WebAppUpnQ8Api.Configuration;
 using UPNprojectApi.Models;
 
 namespace WebAppUpnQ8Api.Models
@@ -56,6 +58,51 @@ namespace WebAppUpnQ8Api.Models
         public virtual DbSet<RefreshTokenTbl> RefreshTokenTbls { get; set; }
         public virtual DbSet<Discounts> Discounts { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+
+            builder.Entity<ApplicationUser>().HasData(new ApplicationUser
+            {
+                Id = DefaultUsers.Admin.Id,
+                FirstName = "UpnQ8A",
+                LastName = "Admin",
+                UserName = DefaultUsers.Admin.Email,
+                NormalizedUserName = DefaultUsers.Admin.Email.ToUpper(),
+                Email = DefaultUsers.Admin.Email,
+                NormalizedEmail = DefaultUsers.Admin.Email.ToUpper(),
+                SecurityStamp = DefaultUsers.Admin.SecurityStamp,
+                ConcurrencyStamp = DefaultUsers.Admin.ConcurrencyStamp,
+                EmailConfirmed = true,
+                PasswordHash = DefaultUsers.Admin.PasswordHash
+            });
+
+            builder.Entity<IdentityRole>().HasData(
+      new IdentityRole
+      {
+          Id = DefaultRoles.Admin.Id,
+          Name = DefaultRoles.Admin.Name,
+          NormalizedName = DefaultRoles.Admin.Name.ToUpper(),
+          ConcurrencyStamp = DefaultRoles.Admin.ConcurrencyStamp
+      },
+      new IdentityRole
+      {
+          Id = DefaultRoles.User.Id,
+          Name = DefaultRoles.User.Name,
+          NormalizedName = DefaultRoles.User.Name.ToUpper(),
+          ConcurrencyStamp = DefaultRoles.User.ConcurrencyStamp
+      }
+  );
+
+
+            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            {
+                UserId = DefaultUsers.Admin.Id,
+                RoleId = DefaultRoles.Admin.Id
+            });
+
+            base.OnModelCreating(builder);
+
+        }
 
     }
 }

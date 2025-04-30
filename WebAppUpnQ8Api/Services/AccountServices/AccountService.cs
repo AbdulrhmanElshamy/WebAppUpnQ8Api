@@ -107,7 +107,7 @@ namespace WebAppUpnQ8Api.Services.AccountServices
             if (result.Succeeded)
             {
 
-                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddToRoleAsync(user, DefaultRoles.User.Name);
 
                 await _dBContext.SaveChangesAsync();
 

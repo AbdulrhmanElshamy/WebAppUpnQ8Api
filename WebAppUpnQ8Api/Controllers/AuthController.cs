@@ -134,7 +134,7 @@ namespace WebAppUpnQ8Api.Controllers
 
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateRole(string name)
         {
             await _service.CreateRole(name);

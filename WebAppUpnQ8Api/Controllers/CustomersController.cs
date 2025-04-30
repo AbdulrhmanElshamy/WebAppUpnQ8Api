@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAppUpnQ8Api.Repository;
 using WebAppUpnQ8Api.ViewModels;
@@ -8,6 +9,7 @@ namespace WebAppUpnQ8Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles ="Admin")]
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerRepository _customerRepository;

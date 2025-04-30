@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UPNprojectApi.Models;
 using WebAppUpnQ8Api.Repository;
@@ -9,6 +10,7 @@ namespace WebAppUpnQ8Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class PlansController : ControllerBase
     {
         private readonly IPlanRepository _planRepository;
@@ -39,6 +41,7 @@ namespace WebAppUpnQ8Api.Controllers
             return await _planRepository.DeletePlan(id);
         }
         [HttpGet("DetailsPlan/{id}")]
+        [Authorize]
         public async Task<Result<PlanDetailsModel>> DetailsPlan(int id)
         {
             return await _planRepository.DetailsPlan(id);
