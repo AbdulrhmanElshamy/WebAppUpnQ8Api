@@ -52,7 +52,7 @@ namespace WebAppUpnQ8Api.Controllers
             return res;
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpPost("Delete/{id}")]
         public async Task<Result<string>> Delete(int id)
         {
          

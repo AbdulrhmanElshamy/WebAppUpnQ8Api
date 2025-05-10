@@ -23,9 +23,11 @@ namespace WebAppUpnQ8Api.Controllers
 
         #region Services
 
-        [HttpPost("GetAll")]
-        public async Task<Result<PagedResult<ServiceViewModel>>> GetAllServices([FromQuery] ServiceQueryParameters queryParameters)
-            => await _serviceRepository.AllServices(queryParameters);
+
+
+        [HttpGet("GetAll")]
+        public async Task<Result<List<ServiceViewModel>>> GetAllServices()
+           => await _serviceRepository.AllServices();
 
         [HttpPost("create")]
         public Task<Result<string>> CreateService([FromForm] AddServiceModel serviceDetails)
@@ -39,7 +41,7 @@ namespace WebAppUpnQ8Api.Controllers
         public Task<Result<ServiceViewModel>> DetailsService(int id)
             => _serviceRepository.DetailsService(id);
 
-        [HttpPost("{id:int}")]
+        [HttpPost("Delete/{id:int}")]
         public Task<Result<string>> DeleteService(int id)
             => _serviceRepository.DeleteService(id);
         #endregion
@@ -78,7 +80,7 @@ namespace WebAppUpnQ8Api.Controllers
         public Task<Result<string>> UpdateSubService([FromForm] SubServiceDetailsModel data)
             => _serviceRepository.EditSubService(data, data.upload);
 
-        [HttpPost("sub-services/{id:int}")]
+        [HttpPost("sub-services/Delete/{id:int}")]
         public Task<Result<string>> DeleteSubService(int id)
             => _serviceRepository.DeleteSubService(id);
 
@@ -98,7 +100,7 @@ namespace WebAppUpnQ8Api.Controllers
         public Task<Result<string>> EditSubFeature([FromBody] SubFeatureModel subFeatures)
             => _serviceRepository.EditSubFeature(subFeatures);
 
-        [HttpPost("sub-features/{id:int}")]
+        [HttpPost("sub-features/Delete/{id:int}")]
         public Task<Result<string>> DeleteSubFeature(int id)
             => _serviceRepository.DeleteSubFeature(id);
 

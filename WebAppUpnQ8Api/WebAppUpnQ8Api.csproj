@@ -37,8 +37,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Images\ServicesImg\" />
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\ServicesImg\022de7fc-0f6f-48bc-b7a5-b5886d49bd29.png" />
+    <None Include="wwwroot\Images\ServicesImg\40ea1083-c860-4e54-832a-4f3705f96bc4.webp" />
+    <None Include="wwwroot\Images\ServicesImg\4220fb55-4ddd-4e13-aca3-d557fed9c744.png" />
+    <None Include="wwwroot\Images\ServicesImg\43cc9af7-ac4f-4655-966e-0259295841f7.png" />
+    <None Include="wwwroot\Images\ServicesImg\58b34ff7-17d0-42ed-afa9-2b4eeaede48c.png" />
+    <None Include="wwwroot\Images\ServicesImg\5a65c11e-956a-4595-a93d-170606af9d92.png" />
+    <None Include="wwwroot\Images\ServicesImg\5b24e964-95a0-4377-908f-230a3c88f7b1.png" />
+    <None Include="wwwroot\Images\ServicesImg\5b2778fa-1d59-4ae3-8578-0f2b9de55022.png" />
+    <None Include="wwwroot\Images\ServicesImg\a8d10b5b-361a-41d7-8656-d418de524d7e.png" />
+    <None Include="wwwroot\Images\ServicesImg\afc5d1b1-f22d-4720-b915-071632ee8d2a.jpg" />
+    <None Include="wwwroot\Images\ServicesImg\b13ece02-0e17-455e-bad9-0497d3efb327.png" />
   </ItemGroup>
 
 </Project>

@@ -48,7 +48,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
 
                         var res = await _dBContext.SaveChangesAsync();
                        
-                            return Result<string>.Success("تمت الاضافة بنجاح");                        
+                            return Result<string>.Success(data:newcontent.Content_ID.ToString());                        
                     }
                 }
                 else
@@ -62,7 +62,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
             }
         }
 
-        public async Task<Result<List<ContentModel>>> AllContents(ContentQueryParameters parameters)
+        public async Task<Result<PagedResult<ContentModel>>> AllContents(ContentQueryParameters parameters)
         {
             try
             {
@@ -74,6 +74,8 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         c.Content_Name.Contains(parameters.Search) ||
                         c.Content_Name_Ar.Contains(parameters.Search));
                 }
+
+                var totalCount = await query.CountAsync();
 
                 var contents = await query
                     .OrderByDescending(c => c.Content_ID)
@@ -87,16 +89,25 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     })
                     .ToListAsync();
 
-                return Result<List<ContentModel>>.Success(contents);
+                var pagedResult = new PagedResult<ContentModel>(
+                    contents,
+                    totalCount,
+                    parameters.PageNumber,
+                    parameters.PageSize,
+                    (int)Math.Ceiling((double)totalCount / parameters.PageSize)
+                );
+
+                return Result<PagedResult<ContentModel>>.Success(pagedResult);
             }
             catch
             {
-                return Result<List<ContentModel>>.Failed("عذرا حدثت مشكلة ما");
+                return Result<PagedResult<ContentModel>>.Failed("عذرا حدثت مشكلة ما");
             }
+
         }
 
 
-        public async Task<Result<List<PlanDetailsModel>>> AllPlans(PlanQueryParameters parameters)
+        public async Task<Result<PagedResult<PlanDetailsModel>>> AllPlans(PlanQueryParameters parameters)
         {
             try
             {
@@ -148,14 +159,19 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Plan_Description_Ar = a.Plan_Description_Ar
                     })
                     .ToListAsync();
+                var pagedResult = new PagedResult<PlanDetailsModel>(
+                            plans,
+                            totalCount,
+                            parameters.PageNumber,
+                            parameters.PageSize,
+                            (int)Math.Ceiling((double)totalCount / parameters.PageSize)
+                        );
 
-                return plans.Count > 0
-                    ? Result<List<PlanDetailsModel>>.Success(plans)
-                    : Result<List<PlanDetailsModel>>.Failed("عذرا لا يوجد خطط بعد");
+                return Result<PagedResult<PlanDetailsModel>>.Success(pagedResult);
             }
             catch
             {
-                return Result<List<PlanDetailsModel>>.Failed("عذرا حدثت مشكلة ما");
+                return Result<PagedResult<PlanDetailsModel>>.Failed("عذرا حدثت مشكلة ما");
             }
         }
 
@@ -535,7 +551,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     await _dBContext.SaveChangesAsync();
                 }
 
-                return Result<string>.Success("تم الحفظ بنجاح");
+                return Result<string>.Success(data:newPlan.Plan_ID.ToString());
             }
             catch (Exception ex)
             {

@@ -10,6 +10,7 @@ namespace WebAppUpnQ8Api.Repository
 
         //Services
         Task<Result<PagedResult<ServiceViewModel>>> AllServices(ServiceQueryParameters parameters);
+        Task<Result<List<ServiceViewModel>>> AllServices();
         Task<Result<ServiceViewModel>> DetailsService(int id);
         Task<Result<string>> EditService(AddServiceModel data, IFormFile upload);
         Task<Result<string>> AddService(AddServiceModel data, IFormFile upload);

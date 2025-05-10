@@ -82,7 +82,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 if (upload is null)
                     return Result<string>.Failed("يرجي اضافة صورة");
 
-                var contentRootPath = _webHostEnvironment.ContentRootPath;
+                var contentRootPath = _webHostEnvironment.WebRootPath;
                 var uploadDirectory = Path.Combine(contentRootPath, "Images/ServicesImg");
 
                 service.Image = await FileHelper.SaveFileAsync(upload, uploadDirectory);
@@ -90,7 +90,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 await _dBContext.ServicesTbls.AddAsync(service);
 
                 if (await _dBContext.SaveChangesAsync() > 0)
-                    return Result<string>.Success("تمت عملية الاضافة بنجاح");
+                    return Result<string>.Success(data:service.Service_ID.ToString());
 
                 return Result<string>.Failed("عذرا لم تتم اضافة الخدمة");
             }
@@ -117,11 +117,10 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 {
                     string Old1IMG = "";
                     Old1IMG = Oldservice.Image;
-                    var contentRootPath = _webHostEnvironment.ContentRootPath;
+                    var contentRootPath = _webHostEnvironment.WebRootPath;
                     if (!string.IsNullOrEmpty(Old1IMG))
                     {
-                        var folderPath = Path.Combine(contentRootPath, "Images/ServicesImg");
-                        FileHelper.DeleteFile(Old1IMG, folderPath);
+                        FileHelper.DeleteFile(Old1IMG);
                     }
 
 
@@ -200,7 +199,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 await _dBContext.SubFeaturesTbls.AddRangeAsync(subFeatures);
                 await _dBContext.SaveChangesAsync();
 
-                return Result<string>.Success("Success");
+                return Result<string>.Success(data: newSubService.Sub_Service_ID.ToString());
             }
             catch
             {
@@ -255,7 +254,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     }).ToListAsync();
 
                 return Result<PagedResult<ServiceRequestDetailsModel>>.Success(
-                    new PagedResult<ServiceRequestDetailsModel>(pagedData, totalCount, query.PageNumber, query.PageSize)
+                    new PagedResult<ServiceRequestDetailsModel>(pagedData, totalCount, query.PageNumber, query.PageSize,(int)Math.Ceiling((double)(int)Math.Ceiling((double)totalCount / query.PageSize)))
                 );
             }
             catch
@@ -298,7 +297,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     })
                     .ToListAsync();
 
-                var result = new PagedResult<ServiceViewModel>(services, totalCount, parameters.Page, parameters.PageSize);
+                var result = new PagedResult<ServiceViewModel>(services, totalCount, parameters.Page, parameters.PageSize, (int)Math.Ceiling((double)totalCount / parameters.PageSize));
 
                 if (services.Any())
                 {
@@ -310,6 +309,41 @@ namespace WebAppUpnQ8Api.RepositoryModels
             catch
             {
                 return Result<PagedResult<ServiceViewModel>>.Failed("عذرا لقد حدثت مشكلة ما");
+            }
+        }
+
+
+
+        public async Task<Result<List<ServiceViewModel>>> AllServices()
+        {
+            try
+            {
+                var query = await _dBContext.ServicesTbls.ToListAsync();
+
+                var services =  query
+                    .OrderByDescending(s => s.Service_ID)
+                    .Select(a => new ServiceViewModel
+                    {
+                        Service_ID = a.Service_ID,
+                        Service_Title = a.Service_Title,
+                        Service_Description = a.Service_Description,
+                        Service_Title_Ar = a.Service_Title_Ar,
+                        Service_Description_Ar = a.Service_Description_Ar,
+                        Image = a.Image,
+                    })
+                    .ToList();
+
+             
+                if (services.Any())
+                {
+                    return Result<List<ServiceViewModel>>.Success(services);
+                }
+
+                return Result<List<ServiceViewModel>>.Failed("عذرا لا يوجد خدمات بعد");
+            }
+            catch
+            {
+                return Result<List<ServiceViewModel>>.Failed("عذرا لقد حدثت مشكلة ما");
             }
         }
 
@@ -337,7 +371,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Service_ID = a.Service_ID
                     }).ToListAsync();
 
-                var result = new PagedResult<SpecialFeatureModel>(features, totalCount, query.PageNumber, query.PageSize);
+                var result = new PagedResult<SpecialFeatureModel>(features, totalCount, query.PageNumber, query.PageSize, (int)Math.Ceiling((double)totalCount / query.PageSize));
 
                 return Result<PagedResult<SpecialFeatureModel>>.Success(result);
             }
@@ -390,7 +424,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                     }).ToListAsync();
 
                 return Result<PagedResult<ServiceRequestDetailsModel>>.Success(
-                    new PagedResult<ServiceRequestDetailsModel>(pagedRequests, totalCount, query.PageNumber, query.PageSize)
+                    new PagedResult<ServiceRequestDetailsModel>(pagedRequests, totalCount, query.PageNumber, query.PageSize, (int)Math.Ceiling((double)totalCount / query.PageSize))
                 );
             }
             catch
@@ -439,7 +473,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Service_ID = s.Service_ID
                     }).ToListAsync();
 
-                return Result<PagedResult<SubServiceViewModel>>.Success(new PagedResult<SubServiceViewModel>(result, totalCount, query.PageNumber, query.PageSize));
+                return Result<PagedResult<SubServiceViewModel>>.Success(new PagedResult<SubServiceViewModel>(result, totalCount, query.PageNumber, query.PageSize, (int)Math.Ceiling((double)totalCount / query.PageSize)));
             }
             catch
             {
@@ -467,16 +501,15 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 Oldsubservice.Sub_Service_Price = data.Sub_Service_Price;
                 if (upload != null)
                 {
-                    var contentRootPath = _webHostEnvironment.ContentRootPath;
+                    var contentRootPath = _webHostEnvironment.WebRootPath;
                     string Old1IMG = "";
                     Old1IMG = Oldsubservice.Image;
-                    var uploadDirectory = Path.Combine(contentRootPath, "Images/ServicesImg");
                     if (Old1IMG is not null)
                     {
-                        FileHelper.DeleteFile(Old1IMG, uploadDirectory);
+                        FileHelper.DeleteFile(Old1IMG);
                     }
 
-                    Oldsubservice.Image = await FileHelper.SaveFileAsync(upload,uploadDirectory);
+                    Oldsubservice.Image = await FileHelper.SaveFileAsync(upload, contentRootPath);
 
                 }
                 await _dBContext.SaveChangesAsync();
@@ -498,7 +531,12 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 {
                     return Result<string>.Failed("لا يمكن حذف الخدمة لوجود ارتباطات اخرى معها");
                 }
+                
                 var subservice = await _dBContext.SubServicesTbls.FindAsync(id);
+
+                if(subservice is null)
+                    return Result<string>.Failed("sub service not found");
+
                 _dBContext.SubServicesTbls.Remove(subservice);
                 await _dBContext.SaveChangesAsync();
                 return Result<string>.Success("تمت عملية الحذف بنجاح");
@@ -684,7 +722,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                         Sub_Service_ID = f.Sub_Service_ID
                     }).ToListAsync();
 
-                return Result<PagedResult<SubFeatureModel>>.Success(new PagedResult<SubFeatureModel>(result, totalCount, query.PageNumber, query.PageSize));
+                return Result<PagedResult<SubFeatureModel>>.Success(new PagedResult<SubFeatureModel>(result, totalCount, query.PageNumber, query.PageSize, (int)Math.Ceiling((double)totalCount / query.PageSize)));
             }
             catch
             {
@@ -732,7 +770,7 @@ namespace WebAppUpnQ8Api.RepositoryModels
                 OldFeature.Sub_Service_ID = subFeatures.Sub_Service_ID ?? 0;
                 await _dBContext.SubFeaturesTbls.AddAsync(OldFeature);
                 await _dBContext.SaveChangesAsync();
-                return Result<string>.Success("تمت عملية الاضافة بنجاح");
+                return Result<string>.Success(data:OldFeature.Sub_Feature_ID.ToString());
 
             }
             catch

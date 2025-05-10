@@ -24,18 +24,19 @@ namespace WebAppUpnQ8Api.Helper
                 await image.SaveAsync(fullPath, encoder);
             }
 
-            return fileName;
+            string relativePath = fullPath.Substring(fullPath.IndexOf("wwwroot\\") + "wwwroot\\".Length);
+
+            return relativePath ;
         }
 
-        public static void DeleteFile(string fileName, string folderPath)
+        public static void DeleteFile(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return;
 
-            var fullPath = Path.Combine(folderPath, fileName);
-            if (File.Exists(fullPath))
+            if (File.Exists(fileName))
             {
-                File.Delete(fullPath);
+                File.Delete(fileName);
             }
         }
     }
