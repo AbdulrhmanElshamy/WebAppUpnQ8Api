@@ -65,7 +65,7 @@ namespace WebAppUpnQ8Api.Services.DiscountServices
             _context.Discounts.Add(discountModel);
             await _context.SaveChangesAsync();
 
-            return Result<string>.Success("Discount Added");
+            return Result<string>.Success(data:discountModel.Discount_ID.ToString());
 
         }
 
