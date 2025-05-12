@@ -6,12 +6,12 @@ namespace WebAppUpnQ8Api.Repository
 {
     public interface IPlanRepository
     {
-        Task<Result<List<PlanDetailsModel>>> AllPlans(PlanQueryParameters parameters);
+        Task<Result<List<PlanDetailsModel>>> AllPlans();
         Task<Result<string>> PostAddNewPlan(PlanDetailsModel plan);
         Task<Result<string>> EditPlan(PlanDetailsModel data);
         Task<Result<string>> DeletePlan(int id);
         Task<Result<PlanDetailsModel>> DetailsPlan(int id);
-        Task<Result<List<ContentModel>>> AllContents(ContentQueryParameters parameters);
+        Task<Result<List<ContentModel>>> AllContents();
         Task<Result<string>> AddEditcontent(ContentModel data);
         Task<Result<string>> DeleteContent(int id);
         Task<Result<List<PlanSubscripModel>>> AllSubscrips(int id);//plan id

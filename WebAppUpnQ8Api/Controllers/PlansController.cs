@@ -20,10 +20,10 @@ namespace WebAppUpnQ8Api.Controllers
             _planRepository = planRepository;
         }
 
-        [HttpPost("GetAllPlans")]
-        public async Task<Result<List<PlanDetailsModel>>> GetPlans(PlanQueryParameters parameters)
+        [HttpGet("GetAllPlans")]
+        public async Task<Result<List<PlanDetailsModel>>> GetPlans()
         {
-            return await _planRepository.AllPlans(parameters);
+            return await _planRepository.AllPlans();
         }
         [HttpPost("AddPlan")]
         public async Task<Result<string>> AddPlan(PlanDetailsModel data)
@@ -46,10 +46,10 @@ namespace WebAppUpnQ8Api.Controllers
         {
             return await _planRepository.DetailsPlan(id);
         }
-        [HttpPost("GetAllContents")]
-        public async Task<Result<List<ContentModel>>> GetContents(ContentQueryParameters parameters)
+        [HttpGet("GetAllContents")]
+        public async Task<Result<List<ContentModel>>> GetContents()
         {
-            return await _planRepository.AllContents(parameters);
+            return await _planRepository.AllContents();
         }
         [HttpPost("AddContent")]
         public async Task<Result<string>> AddContent(ContentModel data)

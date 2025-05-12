@@ -63,23 +63,14 @@ namespace WebAppUpnQ8Api.RepositoryModels
         }
 
 
-        public async Task<Result<List<ContentModel>>> AllContents(ContentQueryParameters parameters)
+        public async Task<Result<List<ContentModel>>> AllContents()
         {
             try
             {
                 var query = _dBContext.ContentsTbls.AsQueryable();
 
-                if (!string.IsNullOrWhiteSpace(parameters.Search))
-                {
-                    query = query.Where(c =>
-                        c.Content_Name.Contains(parameters.Search) ||
-                        c.Content_Name_Ar.Contains(parameters.Search));
-                }
-
-                var contents = await query
+                var contents = await _dBContext.ContentsTbls
                     .OrderByDescending(c => c.Content_ID)
-                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                    .Take(parameters.PageSize)
                     .Select(a => new ContentModel
                     {
                         Content_ID = a.Content_ID,
@@ -97,45 +88,13 @@ namespace WebAppUpnQ8Api.RepositoryModels
         }
 
 
-        public async Task<Result<List<PlanDetailsModel>>> AllPlans(PlanQueryParameters parameters)
+        public async Task<Result<List<PlanDetailsModel>>> AllPlans()
         {
             try
             {
-                var query = _dBContext.PlansTbls.AsQueryable();
 
-                if (!string.IsNullOrWhiteSpace(parameters.Search))
-                {
-                    query = query.Where(p =>
-                        p.Plan_Title.Contains(parameters.Search) ||
-                        p.Plan_Description.Contains(parameters.Search) ||
-                        p.Plan_Title_Ar.Contains(parameters.Search) ||
-                        p.Plan_Description_Ar.Contains(parameters.Search));
-                }
-
-                if (parameters.MinPrice.HasValue)
-                {
-                    query = query.Where(p =>
-                        (p.Price_1m ?? 0) >= (double)parameters.MinPrice ||
-                        (p.Price_6m ?? 0) >= (double)parameters.MinPrice ||
-                        (p.Price_1y ?? 0) >= (double)parameters.MinPrice ||
-                        (p.Price_2y ?? 0) >= (double)parameters.MinPrice);
-                }
-
-                if (parameters.MaxPrice.HasValue)
-                {
-                    query = query.Where(p =>
-                        (p.Price_1m ?? double.MaxValue) <= (double)parameters.MaxPrice ||
-                        (p.Price_6m ?? double.MaxValue) <= (double)parameters.MaxPrice ||
-                        (p.Price_1y ?? double.MaxValue) <= (double)parameters.MaxPrice ||
-                        (p.Price_2y ?? double.MaxValue) <= (double)parameters.MaxPrice);
-                }
-
-                int totalCount = await query.CountAsync();
-
-                var plans = await query
+                var plans = await _dBContext.PlansTbls
                     .OrderByDescending(p => p.Plan_ID)
-                    .Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                    .Take(parameters.PageSize)
                     .Select(a => new PlanDetailsModel
                     {
                         Plan_ID = a.Plan_ID,
